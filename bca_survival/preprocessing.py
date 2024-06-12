@@ -17,3 +17,20 @@ def check_and_remove_negative_days(df):
         df = df[df['days'] >= 0]
 
     return df
+
+
+def create_event_date_column(df, date_death, date_disease_death, date_followup):
+    for i, row in df.iterrows():
+        if not pd.isna(row[date_death]):
+            df.loc[i, "event_date"] = row[date_death]
+            df.loc[i, "event"] = True
+        elif not pd.isna(row[date_disease_death]):
+            df.loc[i, "event_date"] = row[date_disease_death]
+            df.loc[i, "event"] = True
+        elif not pd.isna(row[date_followup]):
+            df.loc[i, "event_date"] = row[date_followup]
+            df.loc[i, "event"] = False
+        else:
+            df.loc[i, "event_date"] = pd.NA
+            df.loc[i, "event"] = pd.NA
+    return df

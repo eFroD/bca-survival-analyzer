@@ -3,6 +3,7 @@ import warnings
 import pandas as pd
 import numpy as np
 from pathlib import Path
+from tqdm.auto import tqdm
 from lifelines import CoxPHFitter, KaplanMeierFitter
 from lifelines.statistics import logrank_test
 from lifelines.exceptions import ConvergenceError
@@ -21,18 +22,37 @@ def perform_univariate_cox_regression(df, columns, standardize=False, penalizer=
         df = standardize_columns(df, columns)
     significant_variables = []
     cph = CoxPHFitter(penalizer=penalizer)
-    for column in columns:
+    for column in tqdm(columns, desc="Analyzing Columns"):
         if verbose:
             print(f"Analyzing column: {column}")
         df_temp = df[[column, 'days', 'event']].dropna()
+        if df_temp[column].mean() == df_temp[column].std() == 0:
+            if verbose:
+                print("Zero mean and zero variance. Skipping.")
+            continue
+        if len(df_temp) < 10:
+            if verbose:
+                print("Too few observations. Skipping.")
+            continue
+        if "WL" in column and len(df_temp[column].value_counts()) < 5:
+            if verbose:
+                print("Too few unique values in BCA. Skipping")
+            continue
+        warning = ""
         try:
-            cph.fit(df_temp, duration_col='days', event_col='event')
+            with warnings.catch_warnings(record=True) as w:
+                warnings.simplefilter("always")
+                cph.fit(df_temp, duration_col='days', event_col='event')
+
+                if w:
+                    warning = "yes"
             summary = cph.summary
             if summary['p'].values[0] < 0.05:
                 significant_variables.append({
                     'Variable': column,
                     'HR': summary['exp(coef)'].values[0],
-                    'p-value': summary['p'].values[0]
+                    'p-value': summary['p'].values[0],
+                    'convergence warning': warning
                 })
         except ConvergenceError:
             warnings.warn("Convergence error encountered for column {}, skipping.".format(column))
