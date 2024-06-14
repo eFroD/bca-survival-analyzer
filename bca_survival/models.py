@@ -60,11 +60,13 @@ def perform_univariate_cox_regression(df, columns, standardize=False, penalizer=
     return significant_df
 
 
-def generate_kaplan_meier_plot(df, column, split_strategy='median', fixed_value=None, output_path=None):
+def generate_kaplan_meier_plot(df, column, split_strategy='median', fixed_value=None, percentage=None, output_path=None):
     if split_strategy == 'mean':
         threshold = df[column].mean()
     elif split_strategy == 'median':
         threshold = df[column].median()
+    elif split_strategy == 'percentage':
+        threshold = df[column].quantile(percentage)
     elif split_strategy == 'fixed' and fixed_value is not None:
         threshold = fixed_value
     else:
