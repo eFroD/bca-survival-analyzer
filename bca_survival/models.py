@@ -3,18 +3,65 @@ import warnings
 import pandas as pd
 import numpy as np
 from pathlib import Path
+
+from sklearn.impute import SimpleImputer
 from tqdm.auto import tqdm
 from lifelines import CoxPHFitter, KaplanMeierFitter
 from lifelines.statistics import logrank_test
 from lifelines.exceptions import ConvergenceError
 import matplotlib.pyplot as plt
+from statsmodels.stats.outliers_influence import variance_inflation_factor
 from sklearn.preprocessing import StandardScaler
+import seaborn as sns
 
 
-def standardize_columns(df, columns):
+def standardize_columns(df, columns, nan_threshold=0.2):
+    for column in columns:
+        nan_ratio = df[column].isna().mean()
+        if nan_ratio > nan_threshold:
+            print(f"Dropping column {column} due to {nan_ratio:.2%} NaNs")
+            columns.remove(column)
+
+    #imputer = SimpleImputer(strategy='median')
+    #df[columns] = imputer.fit_transform(df[columns])
+
     scaler = StandardScaler()
     df[columns] = scaler.fit_transform(df[columns])
     return df
+
+
+def check_multicollinearity(df, columns):
+    corr_matrix = df[columns].corr()
+    sns.heatmap(corr_matrix, annot=True, fmt=".2f")
+    plt.title("Correlation Matrix")
+    plt.show()
+
+    return corr_matrix
+
+
+def perform_multivariate_cox_regression(df, columns, penalizer=0.1, standardize=True, vif_threshold=20):
+    if standardize:
+        df = standardize_columns(df, columns)
+
+    vif_data = calculate_vif(df, columns)
+    print("Variance Inflation Factor (VIF) before removing variables:")
+    print(vif_data)
+
+    # Iteratively remove variables with high VIF
+    while vif_data['VIF'].max() > vif_threshold:
+        high_vif_vars = vif_data[vif_data['VIF'] > vif_threshold]['Variable'].tolist()
+        for var in high_vif_vars:
+            if var in columns:
+                print(f"Removing variable with high VIF: {var}")
+                columns.remove(var)
+        vif_data = calculate_vif(df, columns)
+        print("Updated VIF:")
+        print(vif_data)
+    # Fit the Cox Proportional Hazards model
+    cph = CoxPHFitter(penalizer=penalizer)
+    cph.fit(df[["days", "event"] + columns].dropna(), duration_col="days", event_col="event")
+
+    return cph
 
 
 def perform_univariate_cox_regression(df, columns, standardize=False, penalizer=0.1, verbose=False):
@@ -99,3 +146,17 @@ def generate_kaplan_meier_plot(df, column, split_strategy='median', fixed_value=
         'plot_filename': plot_filename,
         'metrics': logrank_results.test_statistic
     }
+
+
+def calculate_vif(df, columns):
+    # Add a constant for VIF calculation
+    df_with_const = df.copy()
+    df_with_const['constant'] = 1
+
+    # Calculate VIF for each variable
+    vif_data = pd.DataFrame()
+    vif_data['Variable'] = columns
+    vif_data['VIF'] = [variance_inflation_factor(df_with_const[columns + ['constant']].dropna().values, i)
+                       for i in range(len(columns))]
+
+    return vif_data

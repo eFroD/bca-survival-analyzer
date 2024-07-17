@@ -13,7 +13,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            # If your package includes scripts, add them here
+
         ],
     },
 )
