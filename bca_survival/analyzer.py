@@ -27,8 +27,10 @@ class BCASurvivalAnalyzer:
         self.df = check_and_remove_negative_days(self.df)
         return self.df
 
-    def univariate_cox_regression(self, columns, verbose=False, penalizer=0.1):
-        return perform_univariate_cox_regression(self.df, columns, self.standardize, verbose=verbose, penalizer=penalizer)
+    def univariate_cox_regression(self, columns, verbose=False, penalizer=0.1, correction_values=None):
+        if correction_values is None:
+            correction_values = []
+        return perform_univariate_cox_regression(self.df, columns, self.standardize, verbose=verbose, penalizer=penalizer, correction_values=correction_values)
 
     def kaplan_meier_plot(self, column, split_strategy='median', fixed_value=None, output_path=None, percentage=None):
         return generate_kaplan_meier_plot(self.df, column, split_strategy, fixed_value, percentage=percentage, output_path=output_path)

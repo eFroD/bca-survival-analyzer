@@ -64,15 +64,16 @@ def perform_multivariate_cox_regression(df, columns, penalizer=0.1, standardize=
     return cph
 
 
-def perform_univariate_cox_regression(df, columns, standardize=False, penalizer=0.1, verbose=False):
+def perform_univariate_cox_regression(df, columns, standardize=False, penalizer=0.1, verbose=False, correction_values=None):
     if standardize:
         df = standardize_columns(df, columns)
     significant_variables = []
     cph = CoxPHFitter(penalizer=penalizer)
     for column in tqdm(columns, desc="Analyzing Columns"):
+
         if verbose:
             print(f"Analyzing column: {column}")
-        df_temp = df[[column, 'days', 'event']].dropna()
+        df_temp = df[[column, 'days', 'event'] + correction_values].dropna()
         if df_temp[column].mean() == df_temp[column].std() == 0:
             if verbose:
                 print("Zero mean and zero variance. Skipping.")
@@ -95,11 +96,15 @@ def perform_univariate_cox_regression(df, columns, standardize=False, penalizer=
                     warning = "yes"
             summary = cph.summary
             if summary['p'].values[0] < 0.05:
+                if verbose:
+                    print(summary)
                 significant_variables.append({
                     'Variable': column,
                     'HR': summary['exp(coef)'].values[0],
                     'p-value': summary['p'].values[0],
-                    'convergence warning': warning
+                    'convergence warning': warning,
+                    'correction_terms': correction_values,
+                    'summary': summary
                 })
         except ConvergenceError:
             warnings.warn("Convergence error encountered for column {}, skipping.".format(column))
