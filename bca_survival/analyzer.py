@@ -11,6 +11,7 @@ class BCASurvivalAnalyzer:
         df_main = df_main.rename(columns={main_id_col: 'PID'})
         df_measurements = df_measurements.rename(columns={measurement_id_col: 'PID'})
         df_main.replace('nd', np.nan, inplace=True)
+        df_measurements.replace([np.inf, -np.inf], np.nan, inplace=True)
         # Merge the main and measurements dataframes on the unified ID column
         self.df = pd.merge(df_main, df_measurements, on='PID', how='left')
         # self.df = self.df.dropna(subset='event_date')
