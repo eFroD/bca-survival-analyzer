@@ -14,6 +14,7 @@ class BCASurvivalAnalyzer:
         df_measurements.replace([np.inf, -np.inf], np.nan, inplace=True)
         # Merge the main and measurements dataframes on the unified ID column
         self.df = pd.merge(df_main, df_measurements, on='PID', how='left')
+        self.df_negative_days = None
         # self.df = self.df.dropna(subset='event_date')
         # self.df = self.df.dropna(subset='event')
         self.start_date_col = start_date_col
@@ -24,7 +25,7 @@ class BCASurvivalAnalyzer:
 
     def preprocess_data(self):
         self.df = calculate_days(self.df, self.start_date_col, self.event_date_col, self.event_col)
-        self.df = check_and_remove_negative_days(self.df)
+        self.df, self.df_negative_days = check_and_remove_negative_days(self.df)
         return self.df
 
     def univariate_cox_regression(self, columns, verbose=False, penalizer=0.1, correction_values=None):
