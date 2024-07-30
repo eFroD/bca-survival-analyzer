@@ -24,7 +24,7 @@ def standardize_columns(df, columns, nan_threshold=0.2):
 
     #imputer = SimpleImputer(strategy='median')
     #df[columns] = imputer.fit_transform(df[columns])
-
+    df = df.copy()
     scaler = StandardScaler()
     df[columns] = scaler.fit_transform(df[columns])
     return df
