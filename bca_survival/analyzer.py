@@ -21,17 +21,10 @@ class BCASurvivalAnalyzer:
             if not missing_pids.empty:
                 print("Warning: The following PIDs have no BCA values:")
                 print(missing_pids['PID'].unique())
-
-                # Drop the rows in df_main with PIDs not present in df_measurements
                 df_main = df_main[df_main['PID'].isin(df_measurements['PID'])]
-
-        # Merge the dataframes
-        merged_df = pd.merge(df_main, df_measurements, on='PID', how='left')
 
         self.df = pd.merge(df_main, df_measurements, on='PID', how='left')
         self.df_negative_days = None
-        # self.df = self.df.dropna(subset='event_date')
-        # self.df = self.df.dropna(subset='event')
         self.start_date_col = start_date_col
         self.event_date_col = event_date_col
         self.event_col = event_col

@@ -70,10 +70,15 @@ def perform_univariate_cox_regression(df, columns, standardize=False, penalizer=
     significant_variables = []
     cph = CoxPHFitter(penalizer=penalizer)
     for column in tqdm(columns, desc="Analyzing Columns"):
-
+        df_temp = df[[column, 'days', 'event'] + correction_values]
+        len_before = len(df_temp)
+        df_temp = df_temp.dropna()
+        len_after = len(df_temp)
         if verbose:
             print(f"Analyzing column: {column}")
-        df_temp = df[[column, 'days', 'event'] + correction_values].dropna()
+            if len_after < len_before:
+                print(f"Removed {len_after - len_before} nan rows.")
+
         if df_temp[column].mean() == df_temp[column].std() == 0:
             if verbose:
                 print("Zero mean and zero variance. Skipping.")
@@ -105,7 +110,7 @@ def perform_univariate_cox_regression(df, columns, standardize=False, penalizer=
                     'n': len(df_temp),
                     'convergence warning': warning,
                     'correction_terms': correction_values,
-                    'summary': summary
+                  #  'summary': summary
                 })
         except ConvergenceError:
             warnings.warn("Convergence error encountered for column {}, skipping.".format(column))

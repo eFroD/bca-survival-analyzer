@@ -11,11 +11,12 @@ def calculate_days(df, start_date_col, event_date_col, event_col):
 
 def check_and_remove_negative_days(df):
     negative_values_count = (df['days'] < 0).sum()
+    nan_count = (df['days'].isna()).sum()
     df_negative = None
     if negative_values_count > 0:
         print(
-            f"Warning: {negative_values_count} rows will be dropped because they contain values below 0 in the 'days' column.")
-        df_negative = df[df['days'] < 0]
+            f"Warning: {negative_values_count + nan_count} rows will be dropped because they contain values below 0 or nan in the 'days' column.")
+        df_negative = df[(df['days'] < 0) | (df['days'].isna())]
         df = df[df['days'] >= 0]
 
     return df, df_negative
