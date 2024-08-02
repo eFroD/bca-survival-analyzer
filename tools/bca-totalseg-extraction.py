@@ -10,6 +10,7 @@ def process_json_files(root_dir):
     bca_data = []
     file_count = 0
     root_dir = str(Path(root_dir))
+    print("Evaluating all files in {}".format(root_dir))
     # Walk through directory
     for dirpath, dirnames, filenames in os.walk(root_dir):
         if 'total-measurements.json' in filenames:
@@ -26,11 +27,18 @@ def process_json_files(root_dir):
     # Create DataFrame
     if totalseg_data:
         final_total_df = pd.concat(totalseg_data, ignore_index=True)
+    else:
+        print("No total-measurements files found.")
+        final_total_df = pd.DataFrame()
 
 
         # Concatenate and save bca measurements data to CSV
     if bca_data:
         final_bca_df = pd.concat(bca_data, ignore_index=True)
+
+    else:
+        print("No Processable bca files found")
+        final_bca_df = pd.DataFrame()
 
     #combined_df = pd.merge(final_bca_df, final_total_df, on="StudyID", how="left")
     return final_total_df, final_bca_df

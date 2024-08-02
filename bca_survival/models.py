@@ -15,7 +15,7 @@ from sklearn.preprocessing import StandardScaler
 import seaborn as sns
 
 
-def standardize_columns(df, columns, nan_threshold=0.2):
+def standardize_columns(df, columns, nan_threshold=0.7):
     for column in columns:
         nan_ratio = df[column].isna().mean()
         if nan_ratio > nan_threshold:
@@ -102,6 +102,7 @@ def perform_univariate_cox_regression(df, columns, standardize=False, penalizer=
                     'Variable': column,
                     'HR': summary['exp(coef)'].values[0],
                     'p-value': summary['p'].values[0],
+                    'n': len(df_temp),
                     'convergence warning': warning,
                     'correction_terms': correction_values,
                     'summary': summary
