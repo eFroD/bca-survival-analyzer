@@ -77,7 +77,7 @@ def perform_univariate_cox_regression(df, columns, standardize=False, penalizer=
         if verbose:
             print(f"Analyzing column: {column}")
             if len_after < len_before:
-                print(f"Removed {len_after - len_before} nan rows.")
+                print(f"Removed {len_before - len_after} nan rows.")
 
         if df_temp[column].mean() == df_temp[column].std() == 0:
             if verbose:
@@ -107,6 +107,8 @@ def perform_univariate_cox_regression(df, columns, standardize=False, penalizer=
                     'Variable': column,
                     'HR': summary['exp(coef)'].values[0],
                     'p-value': summary['p'].values[0],
+                    '95% lower-bound': summary['coef lower 95%'].iloc[0],
+                    '95% upper-bound': summary['coef upper 95%'].iloc[0],
                     'n': len(df_temp),
                     'convergence warning': warning,
                     'correction_terms': correction_values,
@@ -147,6 +149,7 @@ def generate_kaplan_meier_plot(df, column, split_strategy='median', fixed_value=
     plot_filename = f'km_plot_{column}_{split_strategy}.png'
     plot_filename = (plot_filename.replace(' ', '_').replace('\n', '')
                      .replace('/', '').replace(':', '_'))
+    print(str(Path(output_path, plot_filename)))
     if output_path:
         plt.savefig(str(Path(output_path, plot_filename)))
     else:
