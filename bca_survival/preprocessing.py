@@ -55,7 +55,8 @@ def compute_ratios(df):
         "mean_hu"
     ]
 
-    ratios = [('imat', 'tat'), ('vat', 'tat'), ('eat', 'tat'), ('sat', 'tat'), ('pat', 'tat'), ('muscle', 'bone')]
+    ratios = [('imat', 'tat'), ('vat', 'tat'), ('eat', 'tat'), ('sat', 'tat'), ('pat', 'tat'), ('muscle', 'bone'),
+              ("imat", "muscle")]
 
     # Iterate through each body part and metric combination
     for body_part in body_parts:
