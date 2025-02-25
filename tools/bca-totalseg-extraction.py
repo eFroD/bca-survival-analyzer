@@ -1,3 +1,19 @@
+"""
+BOA Results extractor
+
+This script processes BOA data by extracting measurements from the individual JSON files
+across a directory structure. It targets two types of measurement files:
+- total-measurements.json: Contains segmentation measurements for various organs
+- bca-measurements.json: Contains body composition analysis measurements
+
+The script consolidates these measurements into Excel spreadsheets for further analysis.
+
+Usage:
+    python script_name.py base_path output_path
+
+Author: Eric
+"""
+
 import os
 import json
 import pandas as pd
@@ -6,6 +22,18 @@ from pathlib import Path
 
 
 def process_json_files(root_dir):
+    """
+        Walks through the directory structure, identifies relevant JSON files,
+        processes them, and compiles the data into pandas DataFrames.
+
+        Args:
+            root_dir (str): The root directory to search for measurement files
+
+        Returns:
+            tuple: A tuple containing two DataFrames:
+                - final_total_df: DataFrame with organ segmentation measurements
+                - final_bca_df: DataFrame with body composition analysis measurements
+        """
     totalseg_data = []
     bca_data = []
     file_count = 0
@@ -45,6 +73,16 @@ def process_json_files(root_dir):
 
 
 def process_totalseg_measurements(file_path, dirpath):
+    """
+       Processes an individual total-measurements.json file to extract organ segmentation measurements.
+
+       Args:
+           file_path (str): Path to the JSON file
+           dirpath (str): Directory path containing the file (used to extract the study ID)
+
+       Returns:
+           pandas.DataFrame: A DataFrame with one row representing the measurements from the file
+       """
     with open(file_path, 'r') as file:
         content = json.load(file)
 
@@ -68,14 +106,15 @@ def process_totalseg_measurements(file_path, dirpath):
 
 def process_bca_measurements(folder_path):
     """
-    Processes the bca-measurements.json file in the given folder and extracts the measurement data.
+        Processes the bca-measurements.json file in the given folder and extracts the measurement data.
 
-    Args:
-        folder_path (str): The path to the folder containing the bca-measurements.json file.
+        Args:
+            folder_path (str): The path to the folder containing the bca-measurements.json file.
 
-    Returns:
-        pandas.DataFrame: A DataFrame containing the measurement data with formatted column names.
-    """
+        Returns:
+            pandas.DataFrame or None: A DataFrame containing the measurement data with formatted
+                                     column names, or None if the file doesn't exist.
+        """
     file_path = os.path.join(folder_path, 'bca-measurements.json')
     if not os.path.exists(file_path):
         return None
@@ -103,7 +142,11 @@ def process_bca_measurements(folder_path):
 
 def main(root_path, output_path):
     """
-    Main function to iterate over folders, process the JSON files, and save the results to CSV files.
+    Main function to iterate over folders, process the JSON files, and save the results to Excel files.
+
+    Args:
+        root_path (str): The base directory containing the folders with JSON files
+        output_path (str): Path to save the resulting Excel files
     """
     total_df, bca_df = process_json_files(root_path)
     total_df.to_excel(os.path.join(output_path, 'total-measurements.xlsx'), index=False)
