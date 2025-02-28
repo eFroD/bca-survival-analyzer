@@ -64,9 +64,9 @@ def perform_multivariate_cox_regression(df, columns, penalizer=0.1, standardize=
     return cph
 
 
-def perform_univariate_cox_regression(df, columns, standardize=False, penalizer=0.1, verbose=False, correction_values=None):
+def perform_univariate_cox_regression(df, columns, standardize=False, penalizer=0, verbose=False, correction_values=None, nan_threshold=0.7):
     if standardize:
-        df = standardize_columns(df, columns)
+        df = standardize_columns(df, columns, nan_threshold=nan_threshold)
     significant_variables = []
     cph = CoxPHFitter(penalizer=penalizer)
     for column in tqdm(columns, desc="Analyzing Columns"):
