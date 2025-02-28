@@ -151,6 +151,7 @@ def generate_kaplan_meier_plot(df, column, split_strategy='median', fixed_value=
                      .replace('/', '').replace(':', '_'))
     print(str(Path(output_path, plot_filename)))
     if output_path:
+        Path(output_path).mkdir(exist_ok=True, parents=True)
         plt.savefig(str(Path(output_path, plot_filename)))
     else:
         plt.savefig(str(plot_filename))
