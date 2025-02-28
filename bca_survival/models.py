@@ -116,7 +116,7 @@ def perform_univariate_cox_regression(df, columns, standardize=False, penalizer=
                 })
         except ConvergenceError:
             warnings.warn("Convergence error encountered for column {}, skipping.".format(column))
-    significant_df = pd.DataFrame(significant_variables)
+    significant_df = pd.DataFrame(significant_variables, index=False)
     return significant_df
 
 
