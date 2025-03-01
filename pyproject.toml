@@ -50,7 +50,7 @@ docs = [
 ]
 
 [project.scripts]
-boa-extract = "tools.bca_totalseg_extraction.py:main_cli"
+boa-extract = "bca_survival.tools.bca_totalseg_extraction.py:main_cli"
 
 [tool.setuptools]
 packages = ["bca_survival"]

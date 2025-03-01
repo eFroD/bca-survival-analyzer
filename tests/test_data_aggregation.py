@@ -16,7 +16,7 @@ import unittest
 
 import pandas as pd
 
-from tools.bca_totalseg_extraction import (
+from bca_survival.tools.bca_totalseg_extraction import (
     process_bca_measurements,
     process_json_files,
     process_totalseg_measurements,
