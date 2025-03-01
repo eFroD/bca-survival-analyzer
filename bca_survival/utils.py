@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Tuple, Union, Optional
+from typing import Any, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
