@@ -9,6 +9,7 @@ stages:
 variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.pip-cache"
   PYTHON_VERSION: "3.9"
+  GIT_DEPTH: "0"  # Fetch all history including tags
 
 # Cache dependencies to speed up builds
 cache:
@@ -70,6 +71,7 @@ build:
   <<: *setup_python
   script:
     - pip install build twine
+    - python -m setuptools_scm
     - python -m build
     - twine check dist/*
   artifacts:

@@ -53,7 +53,7 @@ docs = [
 boa-extract = "bca_survival.tools.bca_totalseg_extraction:main_cli"
 
 [tool.setuptools]
-packages = ["bca_survival"]
+packages = ["bca_survival", "bca_survival.tools"]
 
 [tool.setuptools.package-data]
 survival_analysis = ["py.typed"]
