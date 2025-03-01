@@ -23,6 +23,8 @@ cache:
   before_script:
     - python -V
     - pip install --upgrade pip
+    - git fetch --tags
+    - pip install setuptools_scm
     - pip install -e ".[dev]"
 
 # Linting stage
