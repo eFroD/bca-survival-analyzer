@@ -1,7 +1,7 @@
 """
 BCA Survival Analyzer Module.
 
-This module provides a class for performing survival analysis on body composition 
+This module provides a class for performing survival analysis on body composition
 assessment (BCA) data. It combines clinical/demographic data with body measurement data
 and provides methods for univariate and multivariate Cox regression analysis, as well as
 Kaplan-Meier survival curves.
@@ -12,7 +12,11 @@ Requires: pandas, numpy, and custom preprocessing and models modules
 import pandas as pd
 import numpy as np
 from .preprocessing import calculate_days, check_and_remove_negative_days
-from .models import perform_univariate_cox_regression, generate_kaplan_meier_plot, perform_multivariate_cox_regression
+from .models import (
+    perform_univariate_cox_regression,
+    generate_kaplan_meier_plot,
+    perform_multivariate_cox_regression,
+)
 
 
 class BCASurvivalAnalyzer:
@@ -32,8 +36,17 @@ class BCASurvivalAnalyzer:
         standardize (bool): Whether to standardize variables for analysis.
     """
 
-    def __init__(self, df_main, df_measurements, main_id_col, measurement_id_col,
-                 start_date_col, event_date_col, event_col, standardize=False):
+    def __init__(
+        self,
+        df_main,
+        df_measurements,
+        main_id_col,
+        measurement_id_col,
+        start_date_col,
+        event_date_col,
+        event_col,
+        standardize=False,
+    ):
         """
         Initializes the BCASurvivalAnalyzer with clinical and measurement data.
 
@@ -52,22 +65,22 @@ class BCASurvivalAnalyzer:
             and handles infinite values. It also checks for and warns about missing measurements.
         """
         # Rename ID columns to unify them across both dataframes
-        df_main = df_main.rename(columns={main_id_col: 'PID'})
-        df_measurements = df_measurements.rename(columns={measurement_id_col: 'PID'})
-        df_main.replace('nd', np.nan, inplace=True)
+        df_main = df_main.rename(columns={main_id_col: "PID"})
+        df_measurements = df_measurements.rename(columns={measurement_id_col: "PID"})
+        df_main.replace("nd", np.nan, inplace=True)
         df_measurements.replace([np.inf, -np.inf], np.nan, inplace=True)
         # Merge the main and measurements dataframes on the unified ID column
         len_main = len(df_main)
         len_measurements = len(df_measurements)
         if len_main != len_measurements:
-            missing_pids = df_main[~df_main['PID'].isin(df_measurements['PID'])]
+            missing_pids = df_main[~df_main["PID"].isin(df_measurements["PID"])]
 
             if not missing_pids.empty:
                 print("Warning: The following PIDs have no BCA values:")
-                print(missing_pids['PID'].unique())
-                df_main = df_main[df_main['PID'].isin(df_measurements['PID'])]
+                print(missing_pids["PID"].unique())
+                df_main = df_main[df_main["PID"].isin(df_measurements["PID"])]
 
-        self.df = pd.merge(df_main, df_measurements, on='PID', how='left')
+        self.df = pd.merge(df_main, df_measurements, on="PID", how="left")
         self.df_negative_days = None
         self.start_date_col = start_date_col
         self.event_date_col = event_date_col
@@ -92,8 +105,9 @@ class BCASurvivalAnalyzer:
         self.df, self.df_negative_days = check_and_remove_negative_days(self.df)
         return self.df
 
-    def univariate_cox_regression(self, columns, verbose=False, penalizer=0.0, correction_values=None,
-                                  nan_threshold=0.7):
+    def univariate_cox_regression(
+        self, columns, verbose=False, penalizer=0.0, correction_values=None, nan_threshold=0.7
+    ):
         """
         Performs univariate Cox proportional hazards regression for each specified variable.
 
@@ -101,7 +115,7 @@ class BCASurvivalAnalyzer:
             columns (list): List of predictor column names to test individually.
             verbose (bool, optional): Whether to print detailed progress information. Defaults to False.
             penalizer (float, optional): L2 penalizer value to apply to the regression. Defaults to 0.0.
-            correction_values (list, optional): List of column names to include as correction terms in each 
+            correction_values (list, optional): List of column names to include as correction terms in each
                 univariate model. Defaults to None.
             nan_threshold (float, optional): Threshold for NaN values if standardizing. Defaults to 0.7.
 
@@ -116,11 +130,19 @@ class BCASurvivalAnalyzer:
         """
         if correction_values is None:
             correction_values = []
-        return perform_univariate_cox_regression(self.df, columns, self.standardize, verbose=verbose,
-                                                 penalizer=penalizer, correction_values=correction_values,
-                                                 nan_threshold=nan_threshold)
+        return perform_univariate_cox_regression(
+            self.df,
+            columns,
+            self.standardize,
+            verbose=verbose,
+            penalizer=penalizer,
+            correction_values=correction_values,
+            nan_threshold=nan_threshold,
+        )
 
-    def kaplan_meier_plot(self, column, split_strategy='median', fixed_value=None, output_path=None, percentage=None):
+    def kaplan_meier_plot(
+        self, column, split_strategy="median", fixed_value=None, output_path=None, percentage=None
+    ):
         """
         Generates a Kaplan-Meier survival plot for a specified variable.
 
@@ -128,11 +150,11 @@ class BCASurvivalAnalyzer:
             column (str): Column name to use for grouping.
             split_strategy (str, optional): Strategy for splitting data into high/low groups.
                 Options: 'mean', 'median', 'percentage', 'fixed'. Defaults to 'median'.
-            fixed_value (float, optional): Fixed threshold value when split_strategy is 'fixed'. 
+            fixed_value (float, optional): Fixed threshold value when split_strategy is 'fixed'.
                 Defaults to None.
-            output_path (str, optional): Directory path to save the plot. If None, saves in current 
+            output_path (str, optional): Directory path to save the plot. If None, saves in current
                 directory. Defaults to None.
-            percentage (float, optional): Percentile threshold when split_strategy is 'percentage'. 
+            percentage (float, optional): Percentile threshold when split_strategy is 'percentage'.
                 Defaults to None.
 
         Returns:
@@ -143,8 +165,14 @@ class BCASurvivalAnalyzer:
             variable and strategy, then generates a Kaplan-Meier survival plot comparing
             the two groups. It also performs a log-rank test to compare the survival curves.
         """
-        return generate_kaplan_meier_plot(self.df, column, split_strategy, fixed_value, percentage=percentage,
-                                          output_path=output_path)
+        return generate_kaplan_meier_plot(
+            self.df,
+            column,
+            split_strategy,
+            fixed_value,
+            percentage=percentage,
+            output_path=output_path,
+        )
 
     def multivariate_cox_regression(self, columns, penalizer=0.1):
         """
@@ -160,7 +188,7 @@ class BCASurvivalAnalyzer:
         Note:
             This method fits a Cox regression model with all specified variables simultaneously.
             It handles multicollinearity by iteratively removing variables with high VIF values.
-            The standardize parameter from the class initialization determines whether 
+            The standardize parameter from the class initialization determines whether
             variables are standardized before analysis.
         """
         return perform_multivariate_cox_regression(self.df, columns, penalizer, self.standardize)

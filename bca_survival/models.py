@@ -1,8 +1,8 @@
 """
 Survival Analysis Utilities Module.
 
-This module provides functions for performing survival analysis, including Cox proportional hazards 
-regression models and Kaplan-Meier survival curves. It includes utilities for data preprocessing, 
+This module provides functions for performing survival analysis, including Cox proportional hazards
+regression models and Kaplan-Meier survival curves. It includes utilities for data preprocessing,
 multicollinearity checking, and visualization of results.
 
 Requires: pandas, numpy, scikit-learn, lifelines, matplotlib, statsmodels, seaborn
@@ -32,7 +32,7 @@ def standardize_columns(df, columns, nan_threshold=0.7):
     Args:
         df (pd.DataFrame): The input dataframe.
         columns (list): List of column names to standardize.
-        nan_threshold (float, optional): Threshold for NaN values. Columns with more NaNs 
+        nan_threshold (float, optional): Threshold for NaN values. Columns with more NaNs
             than this threshold will be dropped. Defaults to 0.7.
 
     Returns:
@@ -76,7 +76,9 @@ def check_multicollinearity(df, columns):
     return corr_matrix
 
 
-def perform_multivariate_cox_regression(df, columns, penalizer=0.1, standardize=True, vif_threshold=20):
+def perform_multivariate_cox_regression(
+    df, columns, penalizer=0.1, standardize=True, vif_threshold=20
+):
     """
     Performs multivariate Cox proportional hazards regression.
 
@@ -85,7 +87,7 @@ def perform_multivariate_cox_regression(df, columns, penalizer=0.1, standardize=
         columns (list): List of predictor column names.
         penalizer (float, optional): L2 penalizer value to apply to the regression. Defaults to 0.1.
         standardize (bool, optional): Whether to standardize the columns. Defaults to True.
-        vif_threshold (float, optional): Threshold for Variance Inflation Factor (VIF). 
+        vif_threshold (float, optional): Threshold for Variance Inflation Factor (VIF).
             Variables with VIF above this threshold will be removed. Defaults to 20.
 
     Returns:
@@ -103,8 +105,8 @@ def perform_multivariate_cox_regression(df, columns, penalizer=0.1, standardize=
     print(vif_data)
 
     # Iteratively remove variables with high VIF
-    while vif_data['VIF'].max() > vif_threshold:
-        high_vif_vars = vif_data[vif_data['VIF'] > vif_threshold]['Variable'].tolist()
+    while vif_data["VIF"].max() > vif_threshold:
+        high_vif_vars = vif_data[vif_data["VIF"] > vif_threshold]["Variable"].tolist()
         for var in high_vif_vars:
             if var in columns:
                 print(f"Removing variable with high VIF: {var}")
@@ -119,8 +121,15 @@ def perform_multivariate_cox_regression(df, columns, penalizer=0.1, standardize=
     return cph
 
 
-def perform_univariate_cox_regression(df, columns, standardize=False, penalizer=0, verbose=False,
-                                      correction_values=None, nan_threshold=0.7):
+def perform_univariate_cox_regression(
+    df,
+    columns,
+    standardize=False,
+    penalizer=0,
+    verbose=False,
+    correction_values=None,
+    nan_threshold=0.7,
+):
     """
     Performs univariate Cox proportional hazards regression for each variable.
 
@@ -130,7 +139,7 @@ def perform_univariate_cox_regression(df, columns, standardize=False, penalizer=
         standardize (bool, optional): Whether to standardize the columns. Defaults to False.
         penalizer (float, optional): L2 penalizer value to apply to the regression. Defaults to 0.
         verbose (bool, optional): Whether to print detailed progress information. Defaults to False.
-        correction_values (list, optional): List of column names to include as correction terms in each 
+        correction_values (list, optional): List of column names to include as correction terms in each
             univariate model. Often you'll use this to correct for age or gender effects. Defaults to None.
         nan_threshold (float, optional): Threshold for NaN values if standardizing. Defaults to 0.7.
 
@@ -150,7 +159,7 @@ def perform_univariate_cox_regression(df, columns, standardize=False, penalizer=
         correction_values = []
 
     for column in tqdm(columns, desc="Analyzing Columns"):
-        df_temp = df[[column, 'days', 'event'] + correction_values]
+        df_temp = df[[column, "days", "event"] + correction_values]
         len_before = len(df_temp)
         df_temp = df_temp.dropna()
         len_after = len(df_temp)
@@ -175,33 +184,36 @@ def perform_univariate_cox_regression(df, columns, standardize=False, penalizer=
         try:
             with warnings.catch_warnings(record=True) as w:
                 warnings.simplefilter("always")
-                cph.fit(df_temp, duration_col='days', event_col='event')
+                cph.fit(df_temp, duration_col="days", event_col="event")
 
                 if w:
                     warning = "yes"
             summary = cph.summary
-            if summary['p'].values[0] < 0.05:
+            if summary["p"].values[0] < 0.05:
                 if verbose:
                     print(summary)
-                significant_variables.append({
-                    'Variable': column,
-                    'HR': summary['exp(coef)'].values[0],
-                    'p-value': summary['p'].values[0],
-                    '95% lower-bound': summary['coef lower 95%'].iloc[0],
-                    '95% upper-bound': summary['coef upper 95%'].iloc[0],
-                    'n': len(df_temp),
-                    'convergence warning': warning,
-                    'correction_terms': correction_values,
-                    #  'summary': summary
-                })
+                significant_variables.append(
+                    {
+                        "Variable": column,
+                        "HR": summary["exp(coef)"].values[0],
+                        "p-value": summary["p"].values[0],
+                        "95% lower-bound": summary["coef lower 95%"].iloc[0],
+                        "95% upper-bound": summary["coef upper 95%"].iloc[0],
+                        "n": len(df_temp),
+                        "convergence warning": warning,
+                        "correction_terms": correction_values,
+                        #  'summary': summary
+                    }
+                )
         except ConvergenceError:
             warnings.warn("Convergence error encountered for column {}, skipping.".format(column))
     significant_df = pd.DataFrame(significant_variables)
     return significant_df
 
 
-def generate_kaplan_meier_plot(df, column, split_strategy='median', fixed_value=None, percentage=None,
-                               output_path=None):
+def generate_kaplan_meier_plot(
+    df, column, split_strategy="median", fixed_value=None, percentage=None, output_path=None
+):
     """
     Generates a Kaplan-Meier survival plot for a specified variable.
 
@@ -213,16 +225,16 @@ def generate_kaplan_meier_plot(df, column, split_strategy='median', fixed_value=
         fixed_value (float, optional): Fixed threshold value when split_strategy is 'fixed'.
             You can use this when you have found cutoff values from literature.
             Defaults to None.
-        percentage (float, optional): Percentile threshold when split_strategy is 'percentage'. 
+        percentage (float, optional): Percentile threshold when split_strategy is 'percentage'.
             Defaults to None.
-        output_path (str, optional): Directory path to save the plot. If None, saves in current 
+        output_path (str, optional): Directory path to save the plot. If None, saves in current
             directory. Defaults to None.
 
     Returns:
         dict: Dictionary containing the log-rank test p-value, plot filename, and test statistic.
 
     Raises:
-        ValueError: If an invalid split_strategy is provided or if required parameters for a 
+        ValueError: If an invalid split_strategy is provided or if required parameters for a
             particular strategy are missing.
 
     Note:
@@ -230,35 +242,39 @@ def generate_kaplan_meier_plot(df, column, split_strategy='median', fixed_value=
         variable and strategy, then generates a Kaplan-Meier survival plot comparing
         the two groups. It also performs a log-rank test to compare the survival curves.
     """
-    if split_strategy == 'mean':
+    if split_strategy == "mean":
         threshold = df[column].mean()
-    elif split_strategy == 'median':
+    elif split_strategy == "median":
         threshold = df[column].median()
-    elif split_strategy == 'percentage':
+    elif split_strategy == "percentage":
         threshold = df[column].quantile(percentage)
-    elif split_strategy == 'fixed' and fixed_value is not None:
+    elif split_strategy == "fixed" and fixed_value is not None:
         threshold = fixed_value
     else:
-        raise ValueError("Invalid split_strategy. Use 'mean', 'median', or 'fixed'. For 'fixed', provide fixed_value.")
+        raise ValueError(
+            "Invalid split_strategy. Use 'mean', 'median', or 'fixed'. For 'fixed', provide fixed_value."
+        )
     df_tmp = df.copy().dropna(subset=column)
-    df_tmp['group'] = np.where(df_tmp[column] > threshold, 'high', 'low')
+    df_tmp["group"] = np.where(df_tmp[column] > threshold, "high", "low")
     kmf = KaplanMeierFitter()
-    results_high = df_tmp[df_tmp['group'] == 'high']
-    results_low = df_tmp[df_tmp['group'] == 'low']
-    kmf.fit(durations=results_high['days'], event_observed=results_high['event'], label='high')
+    results_high = df_tmp[df_tmp["group"] == "high"]
+    results_low = df_tmp[df_tmp["group"] == "low"]
+    kmf.fit(durations=results_high["days"], event_observed=results_high["event"], label="high")
     ax = kmf.plot_survival_function()
-    kmf.fit(durations=results_low['days'], event_observed=results_low['event'], label='low')
+    kmf.fit(durations=results_low["days"], event_observed=results_low["event"], label="low")
     kmf.plot_survival_function(ax=ax)
-    plt.title(f'Survival function by {column} ({split_strategy} split)')
-    plt.xlabel('Days')
-    plt.ylabel('Survival probability')
-    logrank_results = logrank_test(results_high['days'], results_low['days'], results_high['event'],
-                                   results_low['event'])
+    plt.title(f"Survival function by {column} ({split_strategy} split)")
+    plt.xlabel("Days")
+    plt.ylabel("Survival probability")
+    logrank_results = logrank_test(
+        results_high["days"], results_low["days"], results_high["event"], results_low["event"]
+    )
     p_value = logrank_results.p_value
-    plt.figtext(0.15, 0.2, f'p-value: {p_value:.4f}', fontsize=12, ha='left')
-    plot_filename = f'km_plot_{column}_{split_strategy}.png'
-    plot_filename = (plot_filename.replace(' ', '_').replace('\n', '')
-                     .replace('/', '').replace(':', '_'))
+    plt.figtext(0.15, 0.2, f"p-value: {p_value:.4f}", fontsize=12, ha="left")
+    plot_filename = f"km_plot_{column}_{split_strategy}.png"
+    plot_filename = (
+        plot_filename.replace(" ", "_").replace("\n", "").replace("/", "").replace(":", "_")
+    )
     print(str(Path(output_path, plot_filename)))
     if output_path:
         Path(output_path).mkdir(exist_ok=True, parents=True)
@@ -267,9 +283,9 @@ def generate_kaplan_meier_plot(df, column, split_strategy='median', fixed_value=
         plt.savefig(str(plot_filename))
     plt.show()
     return {
-        'p-value': p_value,
-        'plot_filename': plot_filename,
-        'metrics': logrank_results.test_statistic
+        "p-value": p_value,
+        "plot_filename": plot_filename,
+        "metrics": logrank_results.test_statistic,
     }
 
 
@@ -290,12 +306,14 @@ def calculate_vif(df, columns):
     """
     # Add a constant for VIF calculation
     df_with_const = df.copy()
-    df_with_const['constant'] = 1
+    df_with_const["constant"] = 1
 
     # Calculate VIF for each variable
     vif_data = pd.DataFrame()
-    vif_data['Variable'] = columns
-    vif_data['VIF'] = [variance_inflation_factor(df_with_const[columns + ['constant']].dropna().values, i)
-                       for i in range(len(columns))]
+    vif_data["Variable"] = columns
+    vif_data["VIF"] = [
+        variance_inflation_factor(df_with_const[columns + ["constant"]].dropna().values, i)
+        for i in range(len(columns))
+    ]
 
     return vif_data

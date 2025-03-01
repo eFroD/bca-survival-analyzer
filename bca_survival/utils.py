@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 from datetime import datetime
+
+
 def make_quantile_split(df, column):
     """
     Splits a DataFrame column into quantile-based groups ("low", "high", or missing).
@@ -59,7 +61,7 @@ def make_quantile_split_outter_vs_middle(df, column):
         pd.DataFrame: A new DataFrame with an additional "group" column that indicates the assigned group.
                       Rows with missing values in the specified column are excluded from the result.
 
-  """
+    """
     q25 = df[column].quantile(q=0.25).item()
     q75 = df[column].quantile(q=0.75).item()
 
@@ -70,12 +72,13 @@ def make_quantile_split_outter_vs_middle(df, column):
             return "outer"
         else:
             return "middle"
+
     df_tmp = df.copy().dropna(subset=column)
     df_tmp["group"] = df_tmp[column].apply(assign_group)
     return df_tmp
 
 
-def calculate_age(df, birth_date_col, current_date_col, age_col_name='Age'):
+def calculate_age(df, birth_date_col, current_date_col, age_col_name="Age"):
     """
     Calculate age in years from two columns storing dates in a pandas DataFrame.
 
@@ -88,18 +91,24 @@ def calculate_age(df, birth_date_col, current_date_col, age_col_name='Age'):
     Returns:
         pd.DataFrame: DataFrame with the new column for age.
     """
-    df[birth_date_col] = pd.to_datetime(df[birth_date_col], format='%d.%m.%Y', errors='coerce')
-    df[current_date_col] = pd.to_datetime(df[current_date_col], format='%d.%m.%Y', errors='coerce')
+    df[birth_date_col] = pd.to_datetime(df[birth_date_col], format="%d.%m.%Y", errors="coerce")
+    df[current_date_col] = pd.to_datetime(df[current_date_col], format="%d.%m.%Y", errors="coerce")
 
     df[age_col_name] = np.where(
         df[birth_date_col].notna() & df[current_date_col].notna(),
-        df[current_date_col].dt.year - df[birth_date_col].dt.year - (
-                (df[current_date_col].dt.month < df[birth_date_col].dt.month) |
-                ((df[current_date_col].dt.month == df[birth_date_col].dt.month) &
-                 (df[current_date_col].dt.day < df[birth_date_col].dt.day))
+        df[current_date_col].dt.year
+        - df[birth_date_col].dt.year
+        - (
+            (df[current_date_col].dt.month < df[birth_date_col].dt.month)
+            | (
+                (df[current_date_col].dt.month == df[birth_date_col].dt.month)
+                & (df[current_date_col].dt.day < df[birth_date_col].dt.day)
+            )
         ),
-        np.nan)
+        np.nan,
+    )
     return df
+
 
 def clean_dates(df, date_column, date_format=None):
     """
@@ -119,8 +128,9 @@ def clean_dates(df, date_column, date_format=None):
     df_clean = df.copy()
 
     if date_format is None:
-        df_clean[date_column] = pd.to_datetime(df_clean[date_column], errors='coerce')
+        df_clean[date_column] = pd.to_datetime(df_clean[date_column], errors="coerce")
     else:
+
         def validate_date(date_str):
             try:
                 datetime.strptime(str(date_str), date_format)
@@ -134,10 +144,10 @@ def clean_dates(df, date_column, date_format=None):
 
     removed_rows = original_rows - len(df_clean)
     stats = {
-        'original_rows': original_rows,
-        'cleaned_rows': len(df_clean),
-        'removed_rows': removed_rows,
-        'removal_percentage': round((removed_rows / original_rows) * 100, 2)
+        "original_rows": original_rows,
+        "cleaned_rows": len(df_clean),
+        "removed_rows": removed_rows,
+        "removal_percentage": round((removed_rows / original_rows) * 100, 2),
     }
 
     return df_clean, stats

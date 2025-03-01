@@ -1,8 +1,8 @@
 """
 Survival Data Preprocessing Module.
 
-This module provides utility functions for preprocessing survival analysis data, including 
-calculating time-to-event durations, handling missing or invalid data, creating event indicators, 
+This module provides utility functions for preprocessing survival analysis data, including
+calculating time-to-event durations, handling missing or invalid data, creating event indicators,
 and computing tissue ratios from the BCA values.
 
 Requires: pandas
@@ -18,7 +18,7 @@ def calculate_days(df, start_date_col, event_date_col, event_col):
     Args:
         df (pd.DataFrame): The input dataframe.
         start_date_col (str): Name of the column containing start dates.
-        event_date_col (str, optional): Name of the column containing event dates. 
+        event_date_col (str, optional): Name of the column containing event dates.
             If None, only the event indicator will be created.
         event_col (str): Name of the column containing event indicators (1/0 or True/False).
 
@@ -31,9 +31,11 @@ def calculate_days(df, start_date_col, event_date_col, event_col):
         The 'event' column is converted to integer type.
     """
     if event_date_col:
-        df['days'] = (pd.to_datetime(df[event_date_col], format='%d.%m.%Y') - pd.to_datetime(df[start_date_col],
-                                                                                             format='%d.%m.%Y')).dt.days
-    df['event'] = df[event_col].astype(int)
+        df["days"] = (
+            pd.to_datetime(df[event_date_col], format="%d.%m.%Y")
+            - pd.to_datetime(df[start_date_col], format="%d.%m.%Y")
+        ).dt.days
+    df["event"] = df[event_col].astype(int)
 
     return df
 
@@ -55,14 +57,15 @@ def check_and_remove_negative_days(df):
         the recorded start date. This function identifies and removes such problematic records.
         It prints a warning if any rows are removed.
     """
-    negative_values_count = (df['days'] < 0).sum()
-    nan_count = (df['days'].isna()).sum()
+    negative_values_count = (df["days"] < 0).sum()
+    nan_count = (df["days"].isna()).sum()
     df_negative = None
     if negative_values_count > 0:
         print(
-            f"Warning: {negative_values_count + nan_count} rows will be dropped because they contain values below 0 or nan in the 'days' column.")
-        df_negative = df[(df['days'] < 0) | (df['days'].isna())]
-        df = df[df['days'] >= 0]
+            f"Warning: {negative_values_count + nan_count} rows will be dropped because they contain values below 0 or nan in the 'days' column."
+        )
+        df_negative = df[(df["days"] < 0) | (df["days"].isna())]
+        df = df[df["days"] >= 0]
 
     return df, df_negative
 
@@ -82,7 +85,7 @@ def create_event_date_column(df, date_death, date_disease_death, date_followup):
         pd.DataFrame: DataFrame with added 'event_date' and 'event' columns.
 
     Note:
-        This function prioritizes death dates over follow-up dates. It sets the event 
+        This function prioritizes death dates over follow-up dates. It sets the event
         indicator to True if either death date is present, and False if only the follow-up
         date is available. If no dates are available, both columns are set to NaN.
     """
@@ -120,12 +123,34 @@ def compute_ratios(df):
         '{body_part}::WL::{tissue_type}::{metric}' for measurements
         '{body_part}::WL::{numerator}/{denominator}::{metric}' for ratios
 
-        For example, 'l5::WL::imat/tat::mean_ml' represents the ratio of mean milliliter 
+        For example, 'l5::WL::imat/tat::mean_ml' represents the ratio of mean milliliter
         volume of intramuscular adipose tissue to total adipose tissue at the L5 vertebra level.
     """
     # Define the parts and metrics
-    body_parts = ['ventral_cavity', 'abdominal_cavity', 'thoracic_cavity', 'mediastinum', 'pericardium', 'l5', 'l4',
-                  'l3', 'l2', 'l1', 't12', 't11', 't10', 't9', 't8', 't7', 't6', 't5', 't4', 't3', 't2', 't1']
+    body_parts = [
+        "ventral_cavity",
+        "abdominal_cavity",
+        "thoracic_cavity",
+        "mediastinum",
+        "pericardium",
+        "l5",
+        "l4",
+        "l3",
+        "l2",
+        "l1",
+        "t12",
+        "t11",
+        "t10",
+        "t9",
+        "t8",
+        "t7",
+        "t6",
+        "t5",
+        "t4",
+        "t3",
+        "t2",
+        "t1",
+    ]
     metrics = [
         "mean_ml",
         "std_ml",
@@ -135,19 +160,26 @@ def compute_ratios(df):
         "q3_ml",
         "max_ml",
         "sum_ml",
-        "mean_hu"
+        "mean_hu",
     ]
 
-    ratios = [('imat', 'tat'), ('vat', 'tat'), ('eat', 'tat'), ('sat', 'tat'), ('pat', 'tat'), ('muscle', 'bone'),
-              ("imat", "muscle")]
+    ratios = [
+        ("imat", "tat"),
+        ("vat", "tat"),
+        ("eat", "tat"),
+        ("sat", "tat"),
+        ("pat", "tat"),
+        ("muscle", "bone"),
+        ("imat", "muscle"),
+    ]
 
     # Iterate through each body part and metric combination
     for body_part in body_parts:
         for metric in metrics:
-            for (numerator, denominator) in ratios:
-                num_col = f'{body_part}::WL::{numerator}::{metric}'
-                den_col = f'{body_part}::WL::{denominator}::{metric}'
-                new_col = f'{body_part}::WL::{numerator}/{denominator}::{metric}'
+            for numerator, denominator in ratios:
+                num_col = f"{body_part}::WL::{numerator}::{metric}"
+                den_col = f"{body_part}::WL::{denominator}::{metric}"
+                new_col = f"{body_part}::WL::{numerator}/{denominator}::{metric}"
 
                 if num_col in df.columns and den_col in df.columns:
                     df[new_col] = df[num_col] / df[den_col]
