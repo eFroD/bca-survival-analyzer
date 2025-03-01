@@ -3,7 +3,7 @@ requires = ["setuptools>=45", "wheel", "setuptools_scm>=6.2"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "survival-analysis"
+name = "bca_survival"
 description = "A package for survival analysis with body composition assessment data"
 readme = "README.md"
 requires-python = ">=3.8"
@@ -23,14 +23,14 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Bio-Informatics",
 ]
 dependencies = [
-    "pandas>=1.3.0",
-    "numpy>=1.20.0",
-    "scikit-learn>=1.0.0",
-    "lifelines>=0.27.0",
-    "matplotlib>=3.4.0",
-    "seaborn>=0.11.0",
-    "statsmodels>=0.13.0",
-    "tqdm>=4.60.0",
+    "pandas>=2.2.1",
+    "numpy>=1.24.3",
+    "scikit-learn>=1.4.2",
+    "lifelines>=0.28.0",
+    "matplotlib>=3.9.1",
+    "seaborn>=0.13.2",
+    "statsmodels>=0.14.0",
+    "tqdm>=4.66.4",
 ]
 
 [project.optional-dependencies]
@@ -50,16 +50,16 @@ docs = [
 ]
 
 [project.scripts]
-boa-extract = "survival_analysis.boa_extractor:main_cli"
+boa-extract = "tools.bca_totalseg_extraction.py:main_cli"
 
 [tool.setuptools]
-packages = ["survival_analysis"]
+packages = ["bca_survival"]
 
 [tool.setuptools.package-data]
 survival_analysis = ["py.typed"]
 
 [tool.setuptools_scm]
-write_to = "survival_analysis/_version.py"
+write_to = "bca_survival/_version.py"
 
 [tool.black]
 line-length = 100
@@ -83,11 +83,11 @@ ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 minversion = "7.0"
-addopts = "--cov=survival_analysis --cov-report=term-missing"
+addopts = "--cov=bca_survival --cov-report=term-missing"
 testpaths = ["tests"]
 
 [tool.coverage.run]
-source = ["survival_analysis"]
+source = ["bca_survival"]
 omit = ["tests/*", "*/conftest.py", "*/__init__.py", "*/_version.py"]
 
 [tool.coverage.report]
