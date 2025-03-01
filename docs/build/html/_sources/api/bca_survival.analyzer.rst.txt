@@ -1,0 +1,7 @@
+bca\_survival.analyzer module
+=============================
+
+.. automodule:: bca_survival.analyzer
+   :members:
+   :undoc-members:
+   :show-inheritance:

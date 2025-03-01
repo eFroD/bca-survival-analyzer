@@ -1,0 +1,7 @@
+bca\_survival.preprocessing module
+==================================
+
+.. automodule:: bca_survival.preprocessing
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,7 @@
+bca\_survival.models module
+===========================
+
+.. automodule:: bca_survival.models
+   :members:
+   :undoc-members:
+   :show-inheritance:

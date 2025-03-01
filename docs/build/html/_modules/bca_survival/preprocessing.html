@@ -1,0 +1,268 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>bca_survival.preprocessing &mdash; Survival Analysis development documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=249f3023"></script>
+      <script src="../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Survival Analysis
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">bca_survival</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Survival Analysis</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">bca_survival.preprocessing</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for bca_survival.preprocessing</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Survival Data Preprocessing Module.</span>
+
+<span class="sd">This module provides utility functions for preprocessing survival analysis data, including </span>
+<span class="sd">calculating time-to-event durations, handling missing or invalid data, creating event indicators, </span>
+<span class="sd">and computing tissue ratios from the BCA values.</span>
+
+<span class="sd">Requires: pandas</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+
+<div class="viewcode-block" id="calculate_days">
+<a class="viewcode-back" href="../../api/bca_survival.preprocessing.html#bca_survival.preprocessing.calculate_days">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">calculate_days</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">start_date_col</span><span class="p">,</span> <span class="n">event_date_col</span><span class="p">,</span> <span class="n">event_col</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the number of days between two date columns and sets an event indicator.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df (pd.DataFrame): The input dataframe.</span>
+<span class="sd">        start_date_col (str): Name of the column containing start dates.</span>
+<span class="sd">        event_date_col (str, optional): Name of the column containing event dates. </span>
+<span class="sd">            If None, only the event indicator will be created.</span>
+<span class="sd">        event_col (str): Name of the column containing event indicators (1/0 or True/False).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pd.DataFrame: DataFrame with added &#39;days&#39; and &#39;event&#39; columns.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        The function expects dates in the format &#39;%d.%m.%Y&#39; (e.g., &#39;31.12.2020&#39;).</span>
+<span class="sd">        The &#39;days&#39; column represents the time between start and event dates.</span>
+<span class="sd">        The &#39;event&#39; column is converted to integer type.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">event_date_col</span><span class="p">:</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;days&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">event_date_col</span><span class="p">],</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">.%m.%Y&#39;</span><span class="p">)</span> <span class="o">-</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">start_date_col</span><span class="p">],</span>
+                                                                                             <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">.%m.%Y&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">days</span>
+    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;event&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">event_col</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">df</span></div>
+
+
+
+<div class="viewcode-block" id="check_and_remove_negative_days">
+<a class="viewcode-back" href="../../api/bca_survival.preprocessing.html#bca_survival.preprocessing.check_and_remove_negative_days">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">check_and_remove_negative_days</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Checks for and removes rows with negative or NaN values in the &#39;days&#39; column.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df (pd.DataFrame): The input dataframe with a &#39;days&#39; column.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        tuple: A tuple containing:</span>
+<span class="sd">            - pd.DataFrame: DataFrame with negative and NaN &#39;days&#39; values removed.</span>
+<span class="sd">            - pd.DataFrame or None: DataFrame containing only the removed rows, or None if no rows were removed.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        Negative days values can occur due to data entry errors or when an event occurs before</span>
+<span class="sd">        the recorded start date. This function identifies and removes such problematic records.</span>
+<span class="sd">        It prints a warning if any rows are removed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">negative_values_count</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;days&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="n">nan_count</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;days&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">())</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="n">df_negative</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">negative_values_count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Warning: </span><span class="si">{</span><span class="n">negative_values_count</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">nan_count</span><span class="si">}</span><span class="s2"> rows will be dropped because they contain values below 0 or nan in the &#39;days&#39; column.&quot;</span><span class="p">)</span>
+        <span class="n">df_negative</span> <span class="o">=</span> <span class="n">df</span><span class="p">[(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;days&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;days&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">())]</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;days&#39;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">df</span><span class="p">,</span> <span class="n">df_negative</span></div>
+
+
+
+<div class="viewcode-block" id="create_event_date_column">
+<a class="viewcode-back" href="../../api/bca_survival.preprocessing.html#bca_survival.preprocessing.create_event_date_column">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_event_date_column</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">date_death</span><span class="p">,</span> <span class="n">date_disease_death</span><span class="p">,</span> <span class="n">date_followup</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates an event date column and event indicator based on multiple date columns.</span>
+<span class="sd">    This is used to prepare for Overall Survival analysis.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df (pd.DataFrame): The input dataframe.</span>
+<span class="sd">        date_death (str): Column name containing the date of death.</span>
+<span class="sd">        date_disease_death (str): Column name containing the date of disease-specific death.</span>
+<span class="sd">        date_followup (str): Column name containing the date of last follow-up.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pd.DataFrame: DataFrame with added &#39;event_date&#39; and &#39;event&#39; columns.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        This function prioritizes death dates over follow-up dates. It sets the event </span>
+<span class="sd">        indicator to True if either death date is present, and False if only the follow-up</span>
+<span class="sd">        date is available. If no dates are available, both columns are set to NaN.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">date_death</span><span class="p">]):</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="s2">&quot;event_date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="n">date_death</span><span class="p">]</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="s2">&quot;event&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">date_disease_death</span><span class="p">]):</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="s2">&quot;event_date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="n">date_disease_death</span><span class="p">]</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="s2">&quot;event&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">date_followup</span><span class="p">]):</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="s2">&quot;event_date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="n">date_followup</span><span class="p">]</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="s2">&quot;event&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="s2">&quot;event_date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">NA</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="s2">&quot;event&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">NA</span>
+    <span class="k">return</span> <span class="n">df</span></div>
+
+
+
+<div class="viewcode-block" id="compute_ratios">
+<a class="viewcode-back" href="../../api/bca_survival.preprocessing.html#bca_survival.preprocessing.compute_ratios">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_ratios</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Computes ratios between different tissue measurements across body parts and metrics.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df (pd.DataFrame): The input dataframe containing tissue measurement columns.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pd.DataFrame: DataFrame with additional columns for computed ratios.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        This function calculates ratios such as intramuscular adipose tissue to total adipose tissue</span>
+<span class="sd">        (imat/tat), visceral fat to total fat (vat/tat), etc., for various body parts and metrics.</span>
+
+<span class="sd">        The column naming convention is:</span>
+<span class="sd">        &#39;{body_part}::WL::{tissue_type}::{metric}&#39; for measurements</span>
+<span class="sd">        &#39;{body_part}::WL::{numerator}/{denominator}::{metric}&#39; for ratios</span>
+
+<span class="sd">        For example, &#39;l5::WL::imat/tat::mean_ml&#39; represents the ratio of mean milliliter </span>
+<span class="sd">        volume of intramuscular adipose tissue to total adipose tissue at the L5 vertebra level.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Define the parts and metrics</span>
+    <span class="n">body_parts</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ventral_cavity&#39;</span><span class="p">,</span> <span class="s1">&#39;abdominal_cavity&#39;</span><span class="p">,</span> <span class="s1">&#39;thoracic_cavity&#39;</span><span class="p">,</span> <span class="s1">&#39;mediastinum&#39;</span><span class="p">,</span> <span class="s1">&#39;pericardium&#39;</span><span class="p">,</span> <span class="s1">&#39;l5&#39;</span><span class="p">,</span> <span class="s1">&#39;l4&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;l3&#39;</span><span class="p">,</span> <span class="s1">&#39;l2&#39;</span><span class="p">,</span> <span class="s1">&#39;l1&#39;</span><span class="p">,</span> <span class="s1">&#39;t12&#39;</span><span class="p">,</span> <span class="s1">&#39;t11&#39;</span><span class="p">,</span> <span class="s1">&#39;t10&#39;</span><span class="p">,</span> <span class="s1">&#39;t9&#39;</span><span class="p">,</span> <span class="s1">&#39;t8&#39;</span><span class="p">,</span> <span class="s1">&#39;t7&#39;</span><span class="p">,</span> <span class="s1">&#39;t6&#39;</span><span class="p">,</span> <span class="s1">&#39;t5&#39;</span><span class="p">,</span> <span class="s1">&#39;t4&#39;</span><span class="p">,</span> <span class="s1">&#39;t3&#39;</span><span class="p">,</span> <span class="s1">&#39;t2&#39;</span><span class="p">,</span> <span class="s1">&#39;t1&#39;</span><span class="p">]</span>
+    <span class="n">metrics</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;mean_ml&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;std_ml&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;min_ml&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;q1_ml&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;q2_ml&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;q3_ml&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;max_ml&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;sum_ml&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;mean_hu&quot;</span>
+    <span class="p">]</span>
+
+    <span class="n">ratios</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;imat&#39;</span><span class="p">,</span> <span class="s1">&#39;tat&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;vat&#39;</span><span class="p">,</span> <span class="s1">&#39;tat&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;eat&#39;</span><span class="p">,</span> <span class="s1">&#39;tat&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;sat&#39;</span><span class="p">,</span> <span class="s1">&#39;tat&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;pat&#39;</span><span class="p">,</span> <span class="s1">&#39;tat&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;muscle&#39;</span><span class="p">,</span> <span class="s1">&#39;bone&#39;</span><span class="p">),</span>
+              <span class="p">(</span><span class="s2">&quot;imat&quot;</span><span class="p">,</span> <span class="s2">&quot;muscle&quot;</span><span class="p">)]</span>
+
+    <span class="c1"># Iterate through each body part and metric combination</span>
+    <span class="k">for</span> <span class="n">body_part</span> <span class="ow">in</span> <span class="n">body_parts</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">metrics</span><span class="p">:</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">numerator</span><span class="p">,</span> <span class="n">denominator</span><span class="p">)</span> <span class="ow">in</span> <span class="n">ratios</span><span class="p">:</span>
+                <span class="n">num_col</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">body_part</span><span class="si">}</span><span class="s1">::WL::</span><span class="si">{</span><span class="n">numerator</span><span class="si">}</span><span class="s1">::</span><span class="si">{</span><span class="n">metric</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="n">den_col</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">body_part</span><span class="si">}</span><span class="s1">::WL::</span><span class="si">{</span><span class="n">denominator</span><span class="si">}</span><span class="s1">::</span><span class="si">{</span><span class="n">metric</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="n">new_col</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">body_part</span><span class="si">}</span><span class="s1">::WL::</span><span class="si">{</span><span class="n">numerator</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">denominator</span><span class="si">}</span><span class="s1">::</span><span class="si">{</span><span class="n">metric</span><span class="si">}</span><span class="s1">&#39;</span>
+
+                <span class="k">if</span> <span class="n">num_col</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="ow">and</span> <span class="n">den_col</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                    <span class="n">df</span><span class="p">[</span><span class="n">new_col</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">num_col</span><span class="p">]</span> <span class="o">/</span> <span class="n">df</span><span class="p">[</span><span class="n">den_col</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">df</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Eric.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
