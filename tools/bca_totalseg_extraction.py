@@ -9,7 +9,8 @@ across a directory structure. It targets two types of measurement files:
 The script consolidates these measurements into Excel spreadsheets for further analysis.
 
 Usage:
-    python script_name.py base_path output_path
+    boa-extract base_path output_path
+    python -m survival_analysis.boa_extractor base_path output_path
 
 Author: Eric
 """
@@ -23,17 +24,17 @@ from pathlib import Path
 
 def process_json_files(root_dir):
     """
-        Walks through the directory structure, identifies relevant JSON files,
-        processes them, and compiles the data into pandas DataFrames.
+    Walks through the directory structure, identifies relevant JSON files,
+    processes them, and compiles the data into pandas DataFrames.
 
-        Args:
-            root_dir (str): The root directory to search for measurement files
+    Args:
+        root_dir (str): The root directory to search for measurement files
 
-        Returns:
-            tuple: A tuple containing two DataFrames:
-                - final_total_df: DataFrame with organ segmentation measurements
-                - final_bca_df: DataFrame with body composition analysis measurements
-        """
+    Returns:
+        tuple: A tuple containing two DataFrames:
+            - final_total_df: DataFrame with organ segmentation measurements
+            - final_bca_df: DataFrame with body composition analysis measurements
+    """
     totalseg_data = []
     bca_data = []
     file_count = 0
@@ -59,30 +60,27 @@ def process_json_files(root_dir):
         print("No total-measurements files found.")
         final_total_df = pd.DataFrame()
 
-
-        # Concatenate and save bca measurements data to CSV
+    # Concatenate and save bca measurements data to CSV
     if bca_data:
         final_bca_df = pd.concat(bca_data, ignore_index=True)
-
     else:
         print("No Processable bca files found")
         final_bca_df = pd.DataFrame()
 
-    #combined_df = pd.merge(final_bca_df, final_total_df, on="StudyID", how="left")
     return final_total_df, final_bca_df
 
 
 def process_totalseg_measurements(file_path, dirpath):
     """
-       Processes an individual total-measurements.json file to extract organ segmentation measurements.
+    Processes an individual total-measurements.json file to extract organ segmentation measurements.
 
-       Args:
-           file_path (str): Path to the JSON file
-           dirpath (str): Directory path containing the file (used to extract the study ID)
+    Args:
+        file_path (str): Path to the JSON file
+        dirpath (str): Directory path containing the file (used to extract the study ID)
 
-       Returns:
-           pandas.DataFrame: A DataFrame with one row representing the measurements from the file
-       """
+    Returns:
+        pandas.DataFrame: A DataFrame with one row representing the measurements from the file
+    """
     with open(file_path, 'r') as file:
         content = json.load(file)
 
@@ -106,15 +104,15 @@ def process_totalseg_measurements(file_path, dirpath):
 
 def process_bca_measurements(folder_path):
     """
-        Processes the bca-measurements.json file in the given folder and extracts the measurement data.
+    Processes the bca-measurements.json file in the given folder and extracts the measurement data.
 
-        Args:
-            folder_path (str): The path to the folder containing the bca-measurements.json file.
+    Args:
+        folder_path (str): The path to the folder containing the bca-measurements.json file.
 
-        Returns:
-            pandas.DataFrame or None: A DataFrame containing the measurement data with formatted
-                                     column names, or None if the file doesn't exist.
-        """
+    Returns:
+        pandas.DataFrame or None: A DataFrame containing the measurement data with formatted
+                                column names, or None if the file doesn't exist.
+    """
     file_path = os.path.join(folder_path, 'bca-measurements.json')
     if not os.path.exists(file_path):
         return None
@@ -149,15 +147,51 @@ def main(root_path, output_path):
         output_path (str): Path to save the resulting Excel files
     """
     total_df, bca_df = process_json_files(root_path)
+
+    # Create output directory if it doesn't exist
+    os.makedirs(output_path, exist_ok=True)
+
+    # Save results to Excel files
     total_df.to_excel(os.path.join(output_path, 'total-measurements.xlsx'), index=False)
     bca_df.to_excel(os.path.join(output_path, 'bca-measurements.xlsx'), index=False)
-    #combined_df.to_csv(os.path.join(root_path, str(output_path)+'bca_and_totalseg_measurements.csv'), index=False)
+
+    print(f"Results saved to {output_path}")
+    print(f"Found {len(total_df)} total measurement records and {len(bca_df)} BCA measurement records")
+
+
+def main_cli():
+    """
+    Command-line interface entry point for the BOA extractor.
+    This function is referenced in pyproject.toml to create the console script.
+    """
+    parser = argparse.ArgumentParser(description='Process BOA JSON files and export measurements to Excel files.')
+    parser.add_argument('base_path', type=str, help='The base directory containing the folders with JSON files.')
+    parser.add_argument('output_path', type=str, help='Path to save the resulting Excel files')
+    parser.add_argument('--version', action='version', version=f'%(prog)s {get_version()}')
+    args = parser.parse_args()
+
+    main(args.base_path, args.output_path)
+
+
+def get_version():
+    """
+    Get the version of the package.
+
+    Returns:
+        str: The version string or 'development' if not available
+    """
+    try:
+        from survival_analysis._version import version
+        return version
+    except ImportError:
+        return "development"
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Process JSON files and merge data into a single CSV file.')
+    parser = argparse.ArgumentParser(description='Process BOA JSON files and export measurements to Excel files.')
     parser.add_argument('base_path', type=str, help='The base directory containing the folders with JSON files.')
-    parser.add_argument('output_path', type=str, help='Path to save the resulting DataFrame as a CSV file')
+    parser.add_argument('output_path', type=str, help='Path to save the resulting Excel files')
+    parser.add_argument('--version', action='version', version=f'%(prog)s {get_version()}')
     args = parser.parse_args()
-    main(args.base_path, args.output_path)
 
+    main(args.base_path, args.output_path)
