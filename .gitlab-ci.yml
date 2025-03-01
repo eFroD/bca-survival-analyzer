@@ -31,10 +31,10 @@ lint:
   image: python:$PYTHON_VERSION
   <<: *setup_python
   script:
-    - black --check survival_analysis tests
-    - isort --check survival_analysis tests
-    - flake8 survival_analysis tests
-    - mypy survival_analysis
+    - black --check bca_survival tests
+    - isort --check bca_survival tests
+    - flake8 bca_survival tests
+    - mypy bca_survival
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
@@ -45,7 +45,7 @@ test:
   image: python:$PYTHON_VERSION
   <<: *setup_python
   script:
-    - pytest --cov=survival_analysis
+    - pytest --cov=bca_survival
     - python -m coverage report
     - python -m coverage xml
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)/'
