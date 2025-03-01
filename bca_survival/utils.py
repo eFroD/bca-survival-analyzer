@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Tuple, Union
+from typing import Any, Tuple, Union, Optional
 
 import numpy as np
 import pandas as pd
@@ -33,7 +33,7 @@ def make_quantile_split(df: pd.DataFrame, column: str) -> pd.DataFrame:
     q25 = df[column].quantile(q=0.25).item()
     q75 = df[column].quantile(q=0.75).item()
 
-    def assign_group(x: float) -> Union[str, pd.NA]:
+    def assign_group(x: float) -> Optional[str]:
         if x <= q25:
             return "low"
         elif x >= q75:
