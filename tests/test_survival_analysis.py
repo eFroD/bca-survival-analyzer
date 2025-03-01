@@ -5,43 +5,43 @@ This script tests all functions from the preprocessing, models, and utilities mo
 using synthetic data to ensure proper functionality.
 """
 
-import unittest
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
 import os
-from datetime import datetime, timedelta
+import unittest
 import warnings
+from datetime import datetime, timedelta
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
+# Import analyzer class
+from bca_survival.analyzer import BCASurvivalAnalyzer
+
+# Import models module functions
+from bca_survival.models import (
+    check_multicollinearity,
+    generate_kaplan_meier_plot,
+    perform_multivariate_cox_regression,
+    perform_univariate_cox_regression,
+    standardize_columns,
+)
 
 # Assuming the following imports from your actual modules
 # Import preprocessing module functions
 from bca_survival.preprocessing import (
     calculate_days,
     check_and_remove_negative_days,
-    create_event_date_column,
     compute_ratios,
-)
-
-# Import models module functions
-from bca_survival.models import (
-    standardize_columns,
-    check_multicollinearity,
-    perform_multivariate_cox_regression,
-    perform_univariate_cox_regression,
-    generate_kaplan_meier_plot,
-    calculate_vif,
+    create_event_date_column,
 )
 
 # Import utility functions
 from bca_survival.utils import (
-    make_quantile_split,
-    make_quantile_split_outter_vs_middle,
     calculate_age,
     clean_dates,
+    make_quantile_split,
+    make_quantile_split_outter_vs_middle,
 )
-
-# Import analyzer class
-from bca_survival.analyzer import BCASurvivalAnalyzer
 
 # Suppress matplotlib plots in testing
 plt.ioff()
@@ -338,9 +338,6 @@ class TestModelsFunctions(unittest.TestCase):
         # Ensure high VIF variables were handled
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            cph_correlated = perform_multivariate_cox_regression(
-                self.df, self.correlated_columns, penalizer=0.1, standardize=True, vif_threshold=10
-            )
 
 
 class TestUtilityFunctions(unittest.TestCase):

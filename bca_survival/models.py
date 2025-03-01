@@ -8,24 +8,27 @@ multicollinearity checking, and visualization of results.
 Requires: pandas, numpy, scikit-learn, lifelines, matplotlib, statsmodels, seaborn
 """
 
+import os
 import warnings
-
-import pandas as pd
-import numpy as np
 from pathlib import Path
+from typing import List, Optional, Union
 
-from sklearn.impute import SimpleImputer
-from tqdm.auto import tqdm
-from lifelines import CoxPHFitter, KaplanMeierFitter
-from lifelines.statistics import logrank_test
-from lifelines.exceptions import ConvergenceError
+import lifelines
 import matplotlib.pyplot as plt
-from statsmodels.stats.outliers_influence import variance_inflation_factor
-from sklearn.preprocessing import StandardScaler
+import numpy as np
+import pandas as pd
 import seaborn as sns
+from lifelines import CoxPHFitter, KaplanMeierFitter
+from lifelines.exceptions import ConvergenceError
+from lifelines.statistics import logrank_test
+from sklearn.preprocessing import StandardScaler
+from statsmodels.stats.outliers_influence import variance_inflation_factor
+from tqdm.auto import tqdm
 
 
-def standardize_columns(df, columns, nan_threshold=0.7):
+def standardize_columns(
+    df: pd.DataFrame, columns: List[str], nan_threshold: float = 0.7
+) -> pd.DataFrame:
     """
     Standardizes selected columns and handles missing values.
 
@@ -54,7 +57,7 @@ def standardize_columns(df, columns, nan_threshold=0.7):
     return df
 
 
-def check_multicollinearity(df, columns):
+def check_multicollinearity(df: pd.DataFrame, columns: List[str]) -> pd.DataFrame:
     """
     Checks multicollinearity between variables using a correlation matrix.
 
@@ -77,8 +80,12 @@ def check_multicollinearity(df, columns):
 
 
 def perform_multivariate_cox_regression(
-    df, columns, penalizer=0.1, standardize=True, vif_threshold=20
-):
+    df: pd.DataFrame,
+    columns: List[str],
+    penalizer: float = 0.1,
+    standardize: bool = True,
+    vif_threshold: float = 20,
+) -> lifelines.CoxPHFitter:
     """
     Performs multivariate Cox proportional hazards regression.
 
@@ -122,14 +129,14 @@ def perform_multivariate_cox_regression(
 
 
 def perform_univariate_cox_regression(
-    df,
-    columns,
-    standardize=False,
-    penalizer=0,
-    verbose=False,
-    correction_values=None,
-    nan_threshold=0.7,
-):
+    df: pd.DataFrame,
+    columns: List[str],
+    standardize: bool = False,
+    penalizer: float = 0,
+    verbose: bool = False,
+    correction_values: Union[List[str], None] = None,
+    nan_threshold: float = 0.7,
+) -> pd.DataFrame:
     """
     Performs univariate Cox proportional hazards regression for each variable.
 
@@ -212,8 +219,13 @@ def perform_univariate_cox_regression(
 
 
 def generate_kaplan_meier_plot(
-    df, column, split_strategy="median", fixed_value=None, percentage=None, output_path=None
-):
+    df: pd.DataFrame,
+    column: str,
+    split_strategy: str = "median",
+    fixed_value: Optional[float] = None,
+    percentage: Optional[float] = None,
+    output_path: Optional[Union[os.PathLike[str], str]] = None,
+) -> dict:
     """
     Generates a Kaplan-Meier survival plot for a specified variable.
 
@@ -275,7 +287,6 @@ def generate_kaplan_meier_plot(
     plot_filename = (
         plot_filename.replace(" ", "_").replace("\n", "").replace("/", "").replace(":", "_")
     )
-    print(str(Path(output_path, plot_filename)))
     if output_path:
         Path(output_path).mkdir(exist_ok=True, parents=True)
         plt.savefig(str(Path(output_path, plot_filename)))
@@ -289,7 +300,7 @@ def generate_kaplan_meier_plot(
     }
 
 
-def calculate_vif(df, columns):
+def calculate_vif(df: pd.DataFrame, columns: List[str]) -> pd.DataFrame:
     """
     Calculates the Variance Inflation Factor (VIF) for each variable.
 

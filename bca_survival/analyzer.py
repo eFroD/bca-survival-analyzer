@@ -9,14 +9,18 @@ Kaplan-Meier survival curves.
 Requires: pandas, numpy, and custom preprocessing and models modules
 """
 
-import pandas as pd
+from typing import List, Union
+
+import lifelines
 import numpy as np
-from .preprocessing import calculate_days, check_and_remove_negative_days
+import pandas as pd
+
 from .models import (
-    perform_univariate_cox_regression,
     generate_kaplan_meier_plot,
     perform_multivariate_cox_regression,
+    perform_univariate_cox_regression,
 )
+from .preprocessing import calculate_days, check_and_remove_negative_days
 
 
 class BCASurvivalAnalyzer:
@@ -38,14 +42,14 @@ class BCASurvivalAnalyzer:
 
     def __init__(
         self,
-        df_main,
-        df_measurements,
-        main_id_col,
-        measurement_id_col,
-        start_date_col,
-        event_date_col,
-        event_col,
-        standardize=False,
+        df_main: pd.DataFrame,
+        df_measurements: pd.DataFrame,
+        main_id_col: str,
+        measurement_id_col: str,
+        start_date_col: str,
+        event_date_col: str,
+        event_col: str,
+        standardize: bool = False,
     ):
         """
         Initializes the BCASurvivalAnalyzer with clinical and measurement data.
@@ -88,7 +92,7 @@ class BCASurvivalAnalyzer:
         self.standardize = standardize
         self.preprocess_data()
 
-    def preprocess_data(self):
+    def preprocess_data(self) -> pd.DataFrame:
         """
         Preprocesses the data for survival analysis.
 
@@ -106,8 +110,13 @@ class BCASurvivalAnalyzer:
         return self.df
 
     def univariate_cox_regression(
-        self, columns, verbose=False, penalizer=0.0, correction_values=None, nan_threshold=0.7
-    ):
+        self,
+        columns: List[str],
+        verbose: bool = False,
+        penalizer: float = 0.0,
+        correction_values: Union[List[str], None] = None,
+        nan_threshold: float = 0.7,
+    ) -> pd.DataFrame:
         """
         Performs univariate Cox proportional hazards regression for each specified variable.
 
@@ -141,8 +150,13 @@ class BCASurvivalAnalyzer:
         )
 
     def kaplan_meier_plot(
-        self, column, split_strategy="median", fixed_value=None, output_path=None, percentage=None
-    ):
+        self,
+        column: str,
+        split_strategy: str = "median",
+        fixed_value: Union[float, None] = None,
+        output_path: Union[str, None] = None,
+        percentage: Union[float, None] = None,
+    ) -> dict:
         """
         Generates a Kaplan-Meier survival plot for a specified variable.
 
@@ -174,7 +188,9 @@ class BCASurvivalAnalyzer:
             output_path=output_path,
         )
 
-    def multivariate_cox_regression(self, columns, penalizer=0.1):
+    def multivariate_cox_regression(
+        self, columns: List[str], penalizer: float = 0.1
+    ) -> lifelines.CoxPHFitter:
         """
         Performs multivariate Cox proportional hazards regression.
 

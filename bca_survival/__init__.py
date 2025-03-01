@@ -1,1 +1,1 @@
-from .analyzer import BCASurvivalAnalyzer
+from .analyzer import BCASurvivalAnalyzer  # noqa: F401

@@ -33,7 +33,7 @@ lint:
   script:
     - black --check bca_survival tests
     - isort --check bca_survival tests
-    - flake8 bca_survival tests
+    - flake8 --max-line-length=120 bca_survival tests
     - mypy bca_survival
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH

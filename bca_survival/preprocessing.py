@@ -8,10 +8,14 @@ and computing tissue ratios from the BCA values.
 Requires: pandas
 """
 
+from typing import Tuple
+
 import pandas as pd
 
 
-def calculate_days(df, start_date_col, event_date_col, event_col):
+def calculate_days(
+    df: pd.DataFrame, start_date_col: str, event_date_col: str, event_col: str
+) -> pd.DataFrame:
     """
     Calculates the number of days between two date columns and sets an event indicator.
 
@@ -40,7 +44,7 @@ def calculate_days(df, start_date_col, event_date_col, event_col):
     return df
 
 
-def check_and_remove_negative_days(df):
+def check_and_remove_negative_days(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
     Checks for and removes rows with negative or NaN values in the 'days' column.
 
@@ -62,7 +66,8 @@ def check_and_remove_negative_days(df):
     df_negative = None
     if negative_values_count > 0:
         print(
-            f"Warning: {negative_values_count + nan_count} rows will be dropped because they contain values below 0 or nan in the 'days' column."
+            f"Warning: {negative_values_count + nan_count} rows will be dropped because they contain values below 0 "
+            f"or nan in the 'days' column."
         )
         df_negative = df[(df["days"] < 0) | (df["days"].isna())]
         df = df[df["days"] >= 0]
@@ -70,7 +75,9 @@ def check_and_remove_negative_days(df):
     return df, df_negative
 
 
-def create_event_date_column(df, date_death, date_disease_death, date_followup):
+def create_event_date_column(
+    df: pd.DataFrame, date_death: str, date_disease_death: str, date_followup: str
+) -> pd.DataFrame:
     """
     Creates an event date column and event indicator based on multiple date columns.
     This is used to prepare for Overall Survival analysis.
@@ -105,7 +112,7 @@ def create_event_date_column(df, date_death, date_disease_death, date_followup):
     return df
 
 
-def compute_ratios(df):
+def compute_ratios(df: pd.DataFrame) -> pd.DataFrame:
     """
     Computes ratios between different tissue measurements across body parts and metrics.
 

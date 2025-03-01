@@ -1,9 +1,11 @@
-import pandas as pd
-import numpy as np
 from datetime import datetime
+from typing import Any, Tuple, Union
+
+import numpy as np
+import pandas as pd
 
 
-def make_quantile_split(df, column):
+def make_quantile_split(df: pd.DataFrame, column: str) -> pd.DataFrame:
     """
     Splits a DataFrame column into quantile-based groups ("low", "high", or missing).
     This function computes the 25th (Q1) and 75th (Q3) percentiles for the specified column
@@ -31,7 +33,7 @@ def make_quantile_split(df, column):
     q25 = df[column].quantile(q=0.25).item()
     q75 = df[column].quantile(q=0.75).item()
 
-    def assign_group(x):
+    def assign_group(x: float) -> Union[str, pd.NA]:
         if x <= q25:
             return "low"
         elif x >= q75:
@@ -44,7 +46,7 @@ def make_quantile_split(df, column):
     return df_tmp
 
 
-def make_quantile_split_outter_vs_middle(df, column):
+def make_quantile_split_outter_vs_middle(df: pd.DataFrame, column: str) -> pd.DataFrame:
     """
     Splits a DataFrame column into quantile-based groups ("outter", "middle").
 
@@ -65,7 +67,7 @@ def make_quantile_split_outter_vs_middle(df, column):
     q25 = df[column].quantile(q=0.25).item()
     q75 = df[column].quantile(q=0.75).item()
 
-    def assign_group(x):
+    def assign_group(x: float) -> str:
         if x <= q25:
             return "outer"
         elif x >= q75:
@@ -78,7 +80,9 @@ def make_quantile_split_outter_vs_middle(df, column):
     return df_tmp
 
 
-def calculate_age(df, birth_date_col, current_date_col, age_col_name="Age"):
+def calculate_age(
+    df: pd.DataFrame, birth_date_col: str, current_date_col: str, age_col_name: str = "Age"
+) -> pd.DataFrame:
     """
     Calculate age in years from two columns storing dates in a pandas DataFrame.
 
@@ -110,7 +114,9 @@ def calculate_age(df, birth_date_col, current_date_col, age_col_name="Age"):
     return df
 
 
-def clean_dates(df, date_column, date_format=None):
+def clean_dates(
+    df: pd.DataFrame, date_column: str, date_format: Union[str, None] = None
+) -> Tuple[pd.DataFrame, dict]:
     """
     Cleans a DataFrame by removing rows with invalid date values.
 
@@ -131,7 +137,7 @@ def clean_dates(df, date_column, date_format=None):
         df_clean[date_column] = pd.to_datetime(df_clean[date_column], errors="coerce")
     else:
 
-        def validate_date(date_str):
+        def validate_date(date_str: str) -> Any:
             try:
                 datetime.strptime(str(date_str), date_format)
                 return pd.to_datetime(date_str, format=date_format)

@@ -5,23 +5,24 @@ This script tests the functionality of the BOA Results extractor by creating moc
 directory structures and JSON files to mimic the real data environment.
 """
 
-import unittest
-import os
 import json
-import pandas as pd
+import os
 import shutil
-import tempfile
-from pathlib import Path
 
 # Import the module to be tested - adjust the import path as needed
 import sys
+import tempfile
+import unittest
 
-sys.path.append("tools")  # Add the parent directory to path if needed
+import pandas as pd
+
 from tools.bca_totalseg_extraction import (
+    process_bca_measurements,
     process_json_files,
     process_totalseg_measurements,
-    process_bca_measurements,
 )
+
+sys.path.append("tools")  # Add the parent directory to path if needed
 
 
 class TestBOAExtractor(unittest.TestCase):
