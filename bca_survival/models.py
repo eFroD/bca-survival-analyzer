@@ -25,6 +25,8 @@ from sklearn.preprocessing import StandardScaler
 from statsmodels.stats.outliers_influence import variance_inflation_factor
 from tqdm.auto import tqdm
 
+from bca_survival.utils import make_quantile_split
+
 
 def standardize_columns(
     df: pd.DataFrame, columns: List[str], nan_threshold: float = 0.7
@@ -234,7 +236,7 @@ def generate_kaplan_meier_plot(
         df (pd.DataFrame): The input dataframe. Must contain 'days' and 'event' columns.
         column (str): Column name to use for grouping.
         split_strategy (str, optional): Strategy for splitting data into high/low groups.
-            Options: 'mean', 'median', 'percentage', 'fixed'. Defaults to 'median'.
+            Options: 'mean', 'median', 'percentage', 'fixed', 'quantile'. Defaults to 'median'.
         fixed_value (float, optional): Fixed threshold value when split_strategy is 'fixed'.
             You can use this when you have found cutoff values from literature.
             Defaults to None.
@@ -263,12 +265,17 @@ def generate_kaplan_meier_plot(
         threshold = df[column].quantile(percentage)
     elif split_strategy == "fixed" and fixed_value is not None:
         threshold = fixed_value
+    elif split_strategy == "quantile":
+        threshold = "quantile"
     else:
         raise ValueError(
             "Invalid split_strategy. Use 'mean', 'median', or 'fixed'. For 'fixed', provide fixed_value."
         )
     df_tmp = df.copy().dropna(subset=column)
-    df_tmp["group"] = np.where(df_tmp[column] > threshold, "high", "low")
+    if threshold == "quantile":
+        df_tmp = make_quantile_split(df_tmp, column)
+    else:
+        df_tmp["group"] = np.where(df_tmp[column] > threshold, "high", "low")
     kmf = KaplanMeierFitter()
     results_high = df_tmp[df_tmp["group"] == "high"]
     results_low = df_tmp[df_tmp["group"] == "low"]
