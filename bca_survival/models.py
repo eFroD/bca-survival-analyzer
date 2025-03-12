@@ -175,10 +175,11 @@ def perform_univariate_cox_regression(
             if len_after < len_before:
                 print(f"Removed {len_before - len_after} nan rows.")
 
-        if df_temp[column].mean() == df_temp[column].std() == 0:
-            if verbose:
-                print("Zero mean and zero variance. Skipping.")
-            continue
+        if df_temp[column].dtype.name != "category":
+            if df_temp[column].mean() == df_temp[column].std() == 0:
+                if verbose:
+                    print("Zero mean and zero variance. Skipping.")
+                continue
         if len(df_temp) < 10:
             if verbose:
                 print("Too few observations. Skipping.")
