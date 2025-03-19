@@ -151,7 +151,9 @@ def main(root_path: str, output_path: str) -> None:
         output_path (str): Path to save the resulting Excel files
     """
     total_df, bca_df = process_json_files(root_path)
-
+    if "_" in total_df["StudyID"][0]:
+        bca_df["StudyID"] = bca_df["StudyID"].apply(lambda x: x.split("_")[1]).astype(int)
+        total_df["StudyID"] = total_df["StudyID"].apply(lambda x: x.split("_")[1]).astype(int)
     # Create output directory if it doesn't exist
     os.makedirs(output_path, exist_ok=True)
 

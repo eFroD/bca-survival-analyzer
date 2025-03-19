@@ -9,7 +9,7 @@ readme = "README.md"
 requires-python = ">=3.8"
 license = {text = "MIT"}
 #dynamic = ["version"]
-version = "v0.1.2"
+version = "v0.2.0"
 authors = [
     {name = "Eric Frodl", email = "frodl@med.uni-frankfurt.de"}
 ]
@@ -52,6 +52,7 @@ docs = [
 
 [project.scripts]
 boa-extract = "bca_survival.tools.bca_totalseg_extraction:main_cli"
+bca-merge = "bca_survival.tools.bca_merger:main"
 
 [tool.setuptools]
 packages = ["bca_survival", "bca_survival.tools"]
