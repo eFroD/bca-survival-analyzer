@@ -53,6 +53,7 @@ docs = [
 [project.scripts]
 boa-extract = "bca_survival.tools.bca_totalseg_extraction:main_cli"
 bca-merge = "bca_survival.tools.bca_merger:main"
+survival-result-converter = "bca_survival.tools.results_converter:main"
 
 [tool.setuptools]
 packages = ["bca_survival", "bca_survival.tools"]
