@@ -141,7 +141,7 @@ class BCASurvivalAnalyzer:
             correction_values = []
         return perform_univariate_cox_regression(
             self.df,
-            columns,
+            columns.copy(),
             self.standardize,
             verbose=verbose,
             penalizer=penalizer,
