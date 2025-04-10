@@ -207,8 +207,8 @@ def perform_univariate_cox_regression(
                         "Variable": column,
                         "HR": summary["exp(coef)"].values[0],
                         "p-value": summary["p"].values[0],
-                        "95% lower-bound": summary["coef lower 95%"].iloc[0],
-                        "95% upper-bound": summary["coef upper 95%"].iloc[0],
+                        "95% lower-bound": summary["exp(coef) lower 95%"].iloc[0],
+                        "95% upper-bound": summary["exp(coef) upper 95%"].iloc[0],
                         "n": len(df_temp),
                         "convergence warning": warning,
                         "correction_terms": correction_values,
@@ -228,6 +228,9 @@ def generate_kaplan_meier_plot(
     fixed_value: Optional[float] = None,
     percentage: Optional[float] = None,
     output_path: Optional[Union[os.PathLike[str], str]] = None,
+    dpi: int = 600,
+    custom_title: Optional[str] = None,
+    display_plot: bool = False,
 ) -> dict:
     """
     Generates a Kaplan-Meier survival plot for a specified variable.
@@ -244,6 +247,12 @@ def generate_kaplan_meier_plot(
             Defaults to None.
         output_path (str, optional): Directory path to save the plot. If None, saves in current
             directory. Defaults to None.
+        dpi (int, optional): Resolution of the output image in dots per inch. Higher values
+            result in better quality but larger file sizes. Defaults to 600.
+        custom_title (str, optional): Custom title for the plot. If None, a default title will
+            be generated based on the column and split strategy. Defaults to None.
+        display_plot (bool, optional): Whether to display the plot in the notebook. If False,
+            the plot is only saved to file without rendering. Defaults to False.
 
     Returns:
         dict: Dictionary containing the log-rank test p-value, plot filename, and test statistic.
@@ -257,6 +266,15 @@ def generate_kaplan_meier_plot(
         variable and strategy, then generates a Kaplan-Meier survival plot comparing
         the two groups. It also performs a log-rank test to compare the survival curves.
     """
+    import matplotlib.pyplot as plt
+
+    # For optimization in notebooks when display_plot is False
+    if not display_plot:
+        # Use plt.ioff() to turn off interactive mode
+        plt.ioff()
+    else:
+        plt.ion()
+
     if split_strategy == "mean":
         threshold = df[column].mean()
     elif split_strategy == "median":
@@ -269,38 +287,60 @@ def generate_kaplan_meier_plot(
         threshold = "quantile"
     else:
         raise ValueError(
-            "Invalid split_strategy. Use 'mean', 'median', or 'fixed'. For 'fixed', provide fixed_value."
+            "Invalid split_strategy. Use 'mean', 'median', 'percentage', 'fixed', or 'quantile'. "
+            "For 'fixed', provide fixed_value. For 'percentage', provide percentage."
         )
     df_tmp = df.copy().dropna(subset=column)
     if threshold == "quantile":
         df_tmp = make_quantile_split(df_tmp, column)
     else:
         df_tmp["group"] = np.where(df_tmp[column] > threshold, "high", "low")
+
+    # Create figure
+    fig, ax = plt.subplots()
+
     kmf = KaplanMeierFitter()
     results_high = df_tmp[df_tmp["group"] == "high"]
     results_low = df_tmp[df_tmp["group"] == "low"]
+
     kmf.fit(durations=results_high["days"], event_observed=results_high["event"], label="high")
-    ax = kmf.plot_survival_function()
+    kmf.plot_survival_function(ax=ax)
+
     kmf.fit(durations=results_low["days"], event_observed=results_low["event"], label="low")
     kmf.plot_survival_function(ax=ax)
-    plt.title(f"Survival function by {column} ({split_strategy} split)")
-    plt.xlabel("Days")
-    plt.ylabel("Survival probability")
+
+    # Use custom title if provided, otherwise use default
+    if custom_title:
+        ax.set_title(custom_title)
+    else:
+        ax.set_title(f"Survival function by {column} ({split_strategy} split)")
+
+    ax.set_xlabel("Days")
+    ax.set_ylabel("Survival probability")
+
     logrank_results = logrank_test(
         results_high["days"], results_low["days"], results_high["event"], results_low["event"]
     )
     p_value = logrank_results.p_value
-    plt.figtext(0.15, 0.2, f"p-value: {p_value:.4f}", fontsize=12, ha="left")
+    fig.text(0.15, 0.2, f"p-value: {p_value:.4f}", fontsize=12, ha="left")
+
     plot_filename = f"km_plot_{column}_{split_strategy}.png"
     plot_filename = (
         plot_filename.replace(" ", "_").replace("\n", "").replace("/", "").replace(":", "_")
     )
+
     if output_path:
         Path(output_path).mkdir(exist_ok=True, parents=True)
-        plt.savefig(str(Path(output_path, plot_filename)))
+        fig.savefig(str(Path(output_path, plot_filename)), dpi=dpi)
     else:
-        plt.savefig(str(plot_filename))
-    plt.show()
+        fig.savefig(str(plot_filename), dpi=dpi)
+
+    plt.close(fig)
+
+    # Restore interactive mode if needed
+    if not display_plot:
+        plt.ion()
+
     return {
         "p-value": p_value,
         "plot_filename": plot_filename,
