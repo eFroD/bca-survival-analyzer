@@ -116,6 +116,7 @@ class BCASurvivalAnalyzer:
         penalizer: float = 0.0,
         correction_values: Union[List[str], None] = None,
         nan_threshold: float = 0.7,
+        significant_only: bool = True,
     ) -> pd.DataFrame:
         """
         Performs univariate Cox proportional hazards regression for each specified variable.
@@ -127,6 +128,7 @@ class BCASurvivalAnalyzer:
             correction_values (list, optional): List of column names to include as correction terms in each
                 univariate model. Defaults to None.
             nan_threshold (float, optional): Threshold for NaN values if standardizing. Defaults to 0.7.
+            significant_only (bool, optional): Whether to only include significant observations. Defaults to True.
 
         Returns:
             pd.DataFrame: DataFrame containing significant variables and their statistics.
@@ -147,6 +149,7 @@ class BCASurvivalAnalyzer:
             penalizer=penalizer,
             correction_values=correction_values,
             nan_threshold=nan_threshold,
+            significant_only=significant_only,
         )
 
     def kaplan_meier_plot(

@@ -138,6 +138,7 @@ def perform_univariate_cox_regression(
     verbose: bool = False,
     correction_values: Union[List[str], None] = None,
     nan_threshold: float = 0.7,
+    significant_only: bool = True,
 ) -> pd.DataFrame:
     """
     Performs univariate Cox proportional hazards regression for each variable.
@@ -151,6 +152,7 @@ def perform_univariate_cox_regression(
         correction_values (list, optional): List of column names to include as correction terms in each
             univariate model. Often you'll use this to correct for age or gender effects. Defaults to None.
         nan_threshold (float, optional): Threshold for NaN values if standardizing. Defaults to 0.7.
+        significant_only (bool, optional): Whether to only include significant values. Defaults to True.
 
     Returns:
         pd.DataFrame: DataFrame containing significant variables and their statistics.
@@ -199,7 +201,11 @@ def perform_univariate_cox_regression(
                 if w:
                     warning = "yes"
             summary = cph.summary
-            if summary["p"].values[0] < 0.05:
+            c_index = cph.concordance_index_
+            log_likelihood = cph.log_likelihood_
+            aic = cph.AIC_partial_
+            # bic = cph.BIC_
+            if summary["p"].values[0] < 0.05 or not significant_only:
                 if verbose:
                     print(summary)
                 significant_variables.append(
@@ -210,6 +216,10 @@ def perform_univariate_cox_regression(
                         "95% lower-bound": summary["exp(coef) lower 95%"].iloc[0],
                         "95% upper-bound": summary["exp(coef) upper 95%"].iloc[0],
                         "n": len(df_temp),
+                        "c_index": c_index,
+                        "log_likelihood": log_likelihood,
+                        "aic": aic,
+                        # "bic": bic,
                         "convergence warning": warning,
                         "correction_terms": correction_values,
                         #  'summary': summary
