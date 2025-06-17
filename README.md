@@ -1,3 +1,4 @@
+[![pipeline status](https://fdm-git.diz-ag.med.ovgu.de/ukf-racoon-gruppe/bca-survival-analyzer/badges/main/pipeline.svg)](https://fdm-git.diz-ag.med.ovgu.de/ukf-racoon-gruppe/bca-survival-analyzer/-/commits/main)
 # Survival Analysis Package
 
 A Python package for analyzing survival data with a focus on body composition assessment.
