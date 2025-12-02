@@ -9,7 +9,7 @@ readme = "README.md"
 requires-python = ">=3.8"
 license = {text = "MIT"}
 #dynamic = ["version"]
-version = "v0.2.3"
+version = "v0.2.4"
 authors = [
     {name = "Eric Frodl", email = "frodl@med.uni-frankfurt.de"}
 ]
@@ -25,7 +25,7 @@ classifiers = [
 ]
 dependencies = [
     "pandas>=2.2.1",
-    "numpy>=1.24.3",
+    "numpy>=1.26.4",
     "scikit-learn>=1.4.2",
     "lifelines>=0.28.0",
     "matplotlib>=3.9.1",
@@ -54,6 +54,7 @@ docs = [
 boa-extract = "bca_survival.tools.bca_totalseg_extraction:main_cli"
 bca-merge = "bca_survival.tools.bca_merger:main"
 survival-result-converter = "bca_survival.tools.results_converter:main"
+pdf-report-extractor = "bca_survival.tools.pdf_report_extractor:main"
 
 [tool.setuptools]
 packages = ["bca_survival", "bca_survival.tools"]

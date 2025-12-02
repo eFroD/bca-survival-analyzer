@@ -11,7 +11,7 @@ Requires: pandas, numpy, scikit-learn, lifelines, matplotlib, statsmodels, seabo
 import os
 import warnings
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import List, Optional, Tuple, Union
 
 import lifelines
 import matplotlib.pyplot as plt
@@ -32,31 +32,47 @@ def standardize_columns(
     df: pd.DataFrame, columns: List[str], nan_threshold: float = 0.7
 ) -> pd.DataFrame:
     """
-    Standardizes selected columns and handles missing values.
+    Standardizes only numeric columns and handles missing values.
 
     Args:
         df (pd.DataFrame): The input dataframe.
-        columns (list): List of column names to standardize.
+        columns (list): List of column names to consider for standardization.
         nan_threshold (float, optional): Threshold for NaN values. Columns with more NaNs
             than this threshold will be dropped. Defaults to 0.7.
 
     Returns:
-        pd.DataFrame: DataFrame with standardized columns.
+        pd.DataFrame: DataFrame with standardized numeric columns.
 
     Note:
-        This function creates a copy of the dataframe and standardizes the specified
-        columns using StandardScaler. Columns with too many NaN values are dropped.
+        This function creates a copy of the dataframe and standardizes only the numeric
+        columns using StandardScaler. Categorical columns are left unchanged.
     """
+    # Create a copy of the dataframe to avoid modifying the original
+    df_copy = df.copy()
+
+    # Filter out columns with too many NaNs
+    columns_to_process = columns.copy()  # Create a copy to avoid modifying the input list
     for column in columns:
         nan_ratio = df[column].isna().mean()
         if nan_ratio > nan_threshold:
             print(f"Dropping column {column} due to {nan_ratio:.2%} NaNs")
-            columns.remove(column)
+            columns_to_process.remove(column)
 
-    df = df.copy()
-    scaler = StandardScaler()
-    df[columns] = scaler.fit_transform(df[columns])
-    return df
+    # Separate numeric and non-numeric columns
+    numeric_columns = []
+    for column in columns_to_process:
+        # Check if column is numeric (excluding columns with strings like 'X')
+        if pd.api.types.is_numeric_dtype(df[column]):
+            numeric_columns.append(column)
+        else:
+            print(f"Skipping non-numeric column {column} for standardization")
+
+    # Apply StandardScaler only to numeric columns
+    if numeric_columns:
+        scaler = StandardScaler()
+        df_copy[numeric_columns] = scaler.fit_transform(df_copy[numeric_columns])
+
+    return df_copy
 
 
 def check_multicollinearity(df: pd.DataFrame, columns: List[str]) -> pd.DataFrame:
@@ -164,12 +180,12 @@ def perform_univariate_cox_regression(
     if standardize:
         df = standardize_columns(df, columns, nan_threshold=nan_threshold)
     significant_variables = []
-    cph = CoxPHFitter(penalizer=penalizer)
 
     if correction_values is None:
         correction_values = []
 
     for column in tqdm(columns, desc="Analyzing Columns"):
+        cph = CoxPHFitter(penalizer=penalizer)
         df_temp = df[[column, "days", "event"] + correction_values]
         len_before = len(df_temp)
         df_temp = df_temp.dropna()
@@ -241,6 +257,7 @@ def generate_kaplan_meier_plot(
     dpi: int = 600,
     custom_title: Optional[str] = None,
     display_plot: bool = False,
+    custom_high_low_names: Tuple[str, str] = ("low", "high"),
 ) -> dict:
     """
     Generates a Kaplan-Meier survival plot for a specified variable.
@@ -263,6 +280,8 @@ def generate_kaplan_meier_plot(
             be generated based on the column and split strategy. Defaults to None.
         display_plot (bool, optional): Whether to display the plot in the notebook. If False,
             the plot is only saved to file without rendering. Defaults to False.
+        custom_high_low_names (Tuple[str, str], optional): Custom high and low variable names.
+            Defaults to ("low", "high").
 
     Returns:
         dict: Dictionary containing the log-rank test p-value, plot filename, and test statistic.
@@ -304,19 +323,29 @@ def generate_kaplan_meier_plot(
     if threshold == "quantile":
         df_tmp = make_quantile_split(df_tmp, column)
     else:
-        df_tmp["group"] = np.where(df_tmp[column] > threshold, "high", "low")
+        df_tmp["group"] = np.where(
+            df_tmp[column] > threshold, custom_high_low_names[1], custom_high_low_names[0]
+        )
 
     # Create figure
     fig, ax = plt.subplots()
 
     kmf = KaplanMeierFitter()
-    results_high = df_tmp[df_tmp["group"] == "high"]
-    results_low = df_tmp[df_tmp["group"] == "low"]
+    results_high = df_tmp[df_tmp["group"] == custom_high_low_names[1]]
+    results_low = df_tmp[df_tmp["group"] == custom_high_low_names[0]]
 
-    kmf.fit(durations=results_high["days"], event_observed=results_high["event"], label="high")
+    kmf.fit(
+        durations=results_high["days"],
+        event_observed=results_high["event"],
+        label=custom_high_low_names[1],
+    )
     kmf.plot_survival_function(ax=ax)
 
-    kmf.fit(durations=results_low["days"], event_observed=results_low["event"], label="low")
+    kmf.fit(
+        durations=results_low["days"],
+        event_observed=results_low["event"],
+        label=custom_high_low_names[0],
+    )
     kmf.plot_survival_function(ax=ax)
 
     # Use custom title if provided, otherwise use default

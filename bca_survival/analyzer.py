@@ -9,7 +9,7 @@ Kaplan-Meier survival curves.
 Requires: pandas, numpy, and custom preprocessing and models modules
 """
 
-from typing import List, Union
+from typing import List, Optional, Tuple, Union
 
 import lifelines
 import numpy as np
@@ -159,6 +159,9 @@ class BCASurvivalAnalyzer:
         fixed_value: Union[float, None] = None,
         output_path: Union[str, None] = None,
         percentage: Union[float, None] = None,
+        custom_title: Optional[str] = None,
+        dpi: int = 400,
+        custom_high_low_names: Tuple[str, str] = ("low", "high"),
     ) -> dict:
         """
         Generates a Kaplan-Meier survival plot for a specified variable.
@@ -173,6 +176,13 @@ class BCASurvivalAnalyzer:
                 directory. Defaults to None.
             percentage (float, optional): Percentile threshold when split_strategy is 'percentage'.
                 Defaults to None.
+            custom_title (str, optional): Custom title for the plot. If None, a default title will
+            be generated based on the column and split strategy. Defaults to None.
+            dpi (int, optional): Resolution of the output image in dots per inch. Higher values
+            result in better quality but larger file sizes. Defaults to 400.
+            custom_high_low_names (Tuple[str, str], optional): Custom high and low variable names.
+                Defaults to ("low", "high").
+
 
         Returns:
             dict: Dictionary containing the log-rank test p-value, plot filename, and test statistic.
@@ -189,6 +199,9 @@ class BCASurvivalAnalyzer:
             fixed_value,
             percentage=percentage,
             output_path=output_path,
+            custom_title=custom_title,
+            dpi=dpi,
+            custom_high_low_names=custom_high_low_names,
         )
 
     def multivariate_cox_regression(
