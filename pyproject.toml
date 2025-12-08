@@ -3,13 +3,12 @@ requires = ["setuptools>=45", "wheel", "setuptools_scm>=6.2"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "bca_survival"
-description = "A package for survival analysis with body composition assessment data"
+name = "bca-survival"
+description = "A package for survival analysis with body composition analysis data"
 readme = "README.md"
 requires-python = ">=3.8"
 license = {text = "MIT"}
-#dynamic = ["version"]
-version = "v0.2.4"
+dynamic = ["version"]
 authors = [
     {name = "Eric Frodl", email = "frodl@med.uni-frankfurt.de"}
 ]
@@ -104,3 +103,10 @@ exclude_lines = [
     "pass",
     "raise ImportError",
 ]
+
+[project.urls]
+Homepage = "https://github.com/eFroD/bca-survival-analyzer"
+Documentation = "https://eFroD.github.io/bca-survival-analyzer/"
+Repository = "https://github.com/eFroD/bca-survival-analyzer"
+Issues = "https://github.com/eFroD/bca-survival-analyzer/issues"
+Changelog = "https://github.com/eFroD/bca-survival-analyzer/blob/main/CHANGELOG.md"

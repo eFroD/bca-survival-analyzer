@@ -1,7 +1,12 @@
-[![pipeline status](https://fdm-git.diz-ag.med.ovgu.de/ukf-racoon-gruppe/bca-survival-analyzer/badges/main/pipeline.svg)](https://fdm-git.diz-ag.med.ovgu.de/ukf-racoon-gruppe/bca-survival-analyzer/-/commits/main)
+[![CI](https://github.com/eFroD/bca-survival-analyzer/actions/workflows/ci.yml/badge.svg)](https://github.com/eFroD/bca-survival-analyzer/actions/workflows/ci.yml)
+[![Documentation](https://img.shields.io/badge/docs-latest-blue.svg)](https://eFroD.github.io/bca-survival-analyzer/)
+[![PyPI](https://img.shields.io/pypi/v/bca-survival.svg)](https://pypi.org/project/bca-survival/)
+[![Python Version](https://img.shields.io/pypi/pyversions/bca-survival.svg)](https://pypi.org/project/bca-survival/)
+
+
 # Survival Analysis Package
 
-A Python package for analyzing survival data with a focus on body composition assessment.
+A Python package for analyzing survival data with a focus on body composition assessment. It was designed to utilize the results obtained by the [BOA - Body and Organ Analysis](https://github.com/UMEssen/Body-and-Organ-Analysis) workflow. In this repository we provide tools to reorganize the result of this algorithm to merge it to the patient table, add tools for data cleaning and a [lifelines](https://zenodo.org/records/10456828) wrapper for automatical explorative anaylsis on survival outcomes given the Body-Composition results. 
 
 ## Features
 
@@ -13,15 +18,17 @@ A Python package for analyzing survival data with a focus on body composition as
 
 ## Installation
 
-Check the [Package Registry](https://fdm-git.diz-ag.med.ovgu.de/ukf-racoon-gruppe/bca-survival-analyzer/-/packages) for installation details.
+```bash
+pip install bca-survival
+```
 
 ## Usage
 
 ### Basic Survival Analysis
 ```python
-from survival_analysis.analyzer import BCASurvivalAnalyzer
+from bca_survival.analyzer import BCASurvivalAnalyzer
 
-# Load your data
+# Load your data, sharing the same identifiers
 df_main = pd.read_csv('clinical_data.csv')
 df_measurements = pd.read_csv('bca_measurements.csv')
 
