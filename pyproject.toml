@@ -10,7 +10,7 @@ requires-python = ">=3.8"
 license = {text = "MIT"}
 dynamic = ["version"]
 authors = [
-    {name = "Eric Frodl", email = "frodl@med.uni-frankfurt.de"}
+    {name = "Eric Frodl", email = "eric.frodl@gmx.de"}
 ]
 classifiers = [
     "Development Status :: 4 - Beta",

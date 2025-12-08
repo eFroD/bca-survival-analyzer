@@ -52,3 +52,11 @@ myst_enable_extensions = [
 # Auto-generate API documentation
 autodoc_member_order = 'bysource'
 autoclass_content = 'both'  # Include both class and __init__ docstrings
+
+html_context = {
+    "display_github": True,
+    "github_user": "eFroD",
+    "github_repo": "bca-survival-analyzer",
+    "github_version": "main",
+    "conf_py_path": "/docs/source/",
+}
