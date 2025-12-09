@@ -41,13 +41,13 @@ jobs:
         run: black --check --exclude '_version\.py' bca_survival tests
       
       - name: Run isort
-        run: isort --check bca_survival tests
+        run: isort --check --skip _version.py bca_survival tests
       
       - name: Run flake8
-        run: flake8 --max-line-length=120 bca_survival tests
+        run: flake8 --max-line-length=120 --exclude=_version.py bca_survival tests
       
       - name: Run mypy
-        run: mypy bca_survival
+        run: mypy --exclude _version.py bca_survival
 
   test:
     name: Run Tests
