@@ -84,23 +84,23 @@ def convert_to_csv(excel_file: str, output_folder: str) -> None:
     base_name: str = os.path.splitext(filename)[0]
 
     try:
-        # Read all sheets from the Excel file
-        excel: pd.ExcelFile = pd.ExcelFile(excel_file)
-        sheet_names: List[str] = excel.sheet_names
+        # Read all sheets from the Excel file using context manager
+        with pd.ExcelFile(excel_file) as excel:
+            sheet_names: List[str] = excel.sheet_names
 
-        if len(sheet_names) == 1:
-            # If there's only one sheet, convert it directly
-            output_file: str = os.path.join(output_folder, f"{base_name}.csv")
-            df_single: pd.DataFrame = pd.read_excel(excel_file)
-            df_single.to_csv(output_file, index=False)
-            print(f"Converted {excel_file} to CSV: {output_file}")
-        else:
-            # If there are multiple sheets, create separate CSV files
-            for sheet in sheet_names:
-                sheet_output: str = os.path.join(output_folder, f"{base_name}_{sheet}.csv")
-                df_multi: pd.DataFrame = pd.read_excel(excel_file, sheet_name=sheet)
-                df_multi.to_csv(sheet_output, index=False)
-            print(f"Converted {excel_file} to multiple CSV files in {output_folder}")
+            if len(sheet_names) == 1:
+                # If there's only one sheet, convert it directly
+                output_file: str = os.path.join(output_folder, f"{base_name}.csv")
+                df_single: pd.DataFrame = pd.read_excel(excel, sheet_name=sheet_names[0])
+                df_single.to_csv(output_file, index=False)
+                print(f"Converted {excel_file} to CSV: {output_file}")
+            else:
+                # If there are multiple sheets, create separate CSV files
+                for sheet in sheet_names:
+                    sheet_output: str = os.path.join(output_folder, f"{base_name}_{sheet}.csv")
+                    df_multi: pd.DataFrame = pd.read_excel(excel, sheet_name=sheet)
+                    df_multi.to_csv(sheet_output, index=False)
+                print(f"Converted {excel_file} to multiple CSV files in {output_folder}")
 
     except Exception as e:
         print(f"Error converting {excel_file} to CSV: {str(e)}")
@@ -113,23 +113,23 @@ def convert_to_txt(excel_file: str, output_folder: str) -> None:
     output_file: str = os.path.join(output_folder, f"{base_name}.txt")
 
     try:
-        # Read all sheets from the Excel file
-        excel: pd.ExcelFile = pd.ExcelFile(excel_file)
-        sheet_names: List[str] = excel.sheet_names
+        # Read all sheets from the Excel file using context manager
+        with pd.ExcelFile(excel_file) as excel:
+            sheet_names: List[str] = excel.sheet_names
 
-        with open(output_file, "w", encoding="utf-8") as txt_file:
-            if len(sheet_names) > 1:
-                # If there are multiple sheets, include sheet names in the TXT file
-                for sheet in sheet_names:
-                    df_sheet: pd.DataFrame = pd.read_excel(excel_file, sheet_name=sheet)
-                    txt_file.write(f"Sheet: {sheet}\n")
-                    txt_file.write("=" * 50 + "\n")
-                    txt_file.write(df_sheet.to_string(index=False))
-                    txt_file.write("\n\n")
-            else:
-                # If there's only one sheet, convert it directly
-                df_txt: pd.DataFrame = pd.read_excel(excel_file)
-                txt_file.write(df_txt.to_string(index=False))
+            with open(output_file, "w", encoding="utf-8") as txt_file:
+                if len(sheet_names) > 1:
+                    # If there are multiple sheets, include sheet names in the TXT file
+                    for sheet in sheet_names:
+                        df_sheet: pd.DataFrame = pd.read_excel(excel, sheet_name=sheet)
+                        txt_file.write(f"Sheet: {sheet}\n")
+                        txt_file.write("=" * 50 + "\n")
+                        txt_file.write(df_sheet.to_string(index=False))
+                        txt_file.write("\n\n")
+                else:
+                    # If there's only one sheet, convert it directly
+                    df_txt: pd.DataFrame = pd.read_excel(excel, sheet_name=sheet_names[0])
+                    txt_file.write(df_txt.to_string(index=False))
 
         print(f"Converted {excel_file} to TXT: {output_file}")
 
@@ -143,6 +143,8 @@ def convert_to_pdf_win32(excel_file: str, output_folder: str) -> None:
     base_name: str = os.path.splitext(filename)[0]
     output_file: str = os.path.join(output_folder, f"{base_name}.pdf")
 
+    excel_app = None
+    workbook = None
     try:
         # Initialize Excel application
         excel_app = win32com.client.Dispatch("Excel.Application")
@@ -174,14 +176,22 @@ def convert_to_pdf_win32(excel_file: str, output_folder: str) -> None:
         # Save as PDF
         workbook.ExportAsFixedFormat(0, os.path.abspath(output_file))
 
-        # Close workbook and Excel application
-        workbook.Close(False)
-        excel_app.Quit()
-
         print(f"Converted {excel_file} to PDF: {output_file}")
 
     except Exception as e:
         print(f"Error converting {excel_file} to PDF: {str(e)}")
+    finally:
+        # Always close workbook and Excel application to release file handles
+        if workbook is not None:
+            try:
+                workbook.Close(False)
+            except Exception:
+                pass
+        if excel_app is not None:
+            try:
+                excel_app.Quit()
+            except Exception:
+                pass
 
 
 def convert_to_pdf_fpdf(excel_file: str, output_folder: str) -> None:
@@ -195,6 +205,7 @@ def convert_to_pdf_fpdf(excel_file: str, output_folder: str) -> None:
     base_name: str = os.path.splitext(filename)[0]
     output_file: str = os.path.join(output_folder, f"{base_name}.pdf")
 
+    wb = None
     try:
         # Load the Excel file
         wb = openpyxl.load_workbook(excel_file)
@@ -350,6 +361,13 @@ def convert_to_pdf_fpdf(excel_file: str, output_folder: str) -> None:
 
     except Exception as e:
         print(f"Error converting {excel_file} to PDF: {str(e)}")
+    finally:
+        # Always close the workbook to release file handles
+        if wb is not None:
+            try:
+                wb.close()
+            except Exception:
+                pass
 
 
 def convert_excel_file(excel_file: str) -> None:
