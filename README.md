@@ -1,4 +1,5 @@
 [![CI](https://github.com/eFroD/bca-survival-analyzer/actions/workflows/ci.yml/badge.svg)](https://github.com/eFroD/bca-survival-analyzer/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/github/eFroD/bca-survival-analyzer/graph/badge.svg?token=JUUDEAQJ96)](https://codecov.io/github/eFroD/bca-survival-analyzer)
 [![Documentation](https://img.shields.io/badge/docs-latest-blue.svg)](https://eFroD.github.io/bca-survival-analyzer/)
 [![PyPI](https://img.shields.io/pypi/v/bca-survival.svg)](https://pypi.org/project/bca-survival/)
 [![Python Version](https://img.shields.io/pypi/pyversions/bca-survival.svg)](https://pypi.org/project/bca-survival/)
