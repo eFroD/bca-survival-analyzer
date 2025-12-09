@@ -122,14 +122,14 @@ def clean_dates(
     Cleans a DataFrame by removing rows with invalid date values.
 
     Parameters:
-    df (pandas.DataFrame): The DataFrame to be cleaned.
-    date_column (str): The name of the column containing date values.
-    date_format (str, optional): The format of the date values (e.g., '%Y-%m-%d').
-                                 If None, various formats will be automatically detected.
+        df (pandas.DataFrame): The DataFrame to be cleaned.
+        date_column (str): The name of the column containing date values.
+        date_format (str, optional): The format of the date values (e.g., '%Y-%m-%d').
+            If None, various formats will be automatically detected.
 
     Returns:
-    pandas.DataFrame: Cleaned DataFrame without invalid date values.
-    dict: Statistics about the cleaning process
+        pandas.DataFrame: Cleaned DataFrame without invalid date values.
+        dict: Statistics about the cleaning process
     """
     original_rows = len(df)
     df_clean = df.copy()

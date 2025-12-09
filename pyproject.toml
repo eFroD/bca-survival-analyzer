@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "bca-survival"
 description = "A package for survival analysis with body composition analysis data"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 license = {text = "MIT"}
 dynamic = ["version"]
 authors = [
@@ -16,7 +16,6 @@ classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Science/Research",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Topic :: Scientific/Engineering :: Medical Science Apps.",
@@ -47,6 +46,7 @@ docs = [
     "sphinx>=4.5.0",
     "sphinx-rtd-theme>=1.0.0",
     "myst-parser>=0.17.0",
+    "sphinx-autodoc-typehints>=1.19.0",
 ]
 
 [project.scripts]
@@ -66,7 +66,7 @@ write_to = "bca_survival/_version.py"
 
 [tool.black]
 line-length = 100
-target-version = ["py38"]
+target-version = ["py39"]
 include = '\.pyi?$'
 
 [tool.isort]
@@ -74,7 +74,7 @@ profile = "black"
 line_length = 100
 
 [tool.mypy]
-python_version = "3.8"
+python_version = "3.9"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true

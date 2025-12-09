@@ -1,0 +1,7 @@
+# Documentation build requirements
+# Install with: pip install -r docs/requirements.txt
+
+sphinx>=4.5.0
+sphinx-rtd-theme>=1.0.0
+myst-parser>=0.17.0
+sphinx-autodoc-typehints>=1.19.0

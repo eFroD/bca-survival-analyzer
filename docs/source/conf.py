@@ -7,13 +7,13 @@ from datetime import datetime
 sys.path.insert(0, os.path.abspath('../..'))
 
 # Project information
-project = 'Survival Analysis'
-copyright = f'{datetime.now().year}, Eric'
-author = 'Eric'
+project = 'BCA Survival Analysis'
+copyright = f'{datetime.now().year}, Eric Frodl'
+author = 'Eric Frodl'
 
 # The full version, including alpha/beta/rc tags
 try:
-    from survival_analysis._version import version
+    from bca_survival._version import version
     release = version
 except ImportError:
     release = 'development'
