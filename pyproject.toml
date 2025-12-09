@@ -68,17 +68,9 @@ write_to = "bca_survival/_version.py"
 line-length = 100
 target-version = ["py39"]
 include = '\.pyi?$'
-exclude = '''
+extend-exclude = '''
 /(
-    \.git
-  | \.mypy_cache
-  | \.pytest_cache
-  | \.tox
-  | \.venv
-  | _build
-  | build
-  | dist
-  | _version\.py
+    _version\.py
 )/
 '''
 

@@ -38,7 +38,7 @@ jobs:
           pip install -e ".[dev]"
       
       - name: Run Black
-        run: black --check bca_survival tests
+        run: black --check --exclude '_version\.py' bca_survival tests
       
       - name: Run isort
         run: isort --check bca_survival tests
