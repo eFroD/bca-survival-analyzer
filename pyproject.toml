@@ -68,6 +68,19 @@ write_to = "bca_survival/_version.py"
 line-length = 100
 target-version = ["py39"]
 include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+  | \.mypy_cache
+  | \.pytest_cache
+  | \.tox
+  | \.venv
+  | _build
+  | build
+  | dist
+  | _version\.py
+)/
+'''
 
 [tool.isort]
 profile = "black"
@@ -106,6 +119,7 @@ exclude_lines = [
 
 [project.urls]
 Homepage = "https://github.com/eFroD/bca-survival-analyzer"
-Documentation = "https://eFroD.github.io/bca-survival-analyzer/"
+Documentation = "https://eFroD.github.io/bca-survival-analyzer"
 Repository = "https://github.com/eFroD/bca-survival-analyzer"
 Issues = "https://github.com/eFroD/bca-survival-analyzer/issues"
+Changelog = "https://github.com/eFroD/bca-survival-analyzer/blob/main/CHANGELOG.md"
