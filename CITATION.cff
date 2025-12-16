@@ -1,0 +1,58 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: >-
+  bca-survival: A Python package for body composition-based
+  survival analysis
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Eric
+    family-names: Frodl
+    email: eric.frodl@gmx.de
+    orcid: 'https://orcid.org/0009-0002-7657-0344'
+    affiliation: >-
+      Goethe University Frankfurt, University Hospital,
+      Department of Radiology and Nuclear Medicine, Germany
+  - given-names: Benedikt
+    family-names: Wichtlhuber
+    affiliation: >-
+      Goethe University Frankfurt, University Hospital,
+      Department of Radiology and Nuclear Medicine, Germany
+    email: wichtlhuber@med.uni-frankfurt.de
+  - given-names: Matthias
+    family-names: Neitzel
+    affiliation: >-
+      Goethe University Frankfurt, University Hospital,
+      Department of Radiology and Nuclear Medicine, Germany
+    orcid: 'https://orcid.org/0009-0008-5172-3512'
+    email: ma.neitzel@med.uni-frankfurt.de
+  - given-names: Andreas  Michael
+    family-names: Bucher
+    email: bucher@med.uni-frankfurt.de
+    affiliation: >-
+      Goethe University Frankfurt, University Hospital,
+      Department of Radiology and Nuclear Medicine, Germany
+    orcid: 'https://orcid.org/0009-0003-5012-161X'
+repository-code: 'https://github.com/eFroD/bca-survival-analyzer'
+url: 'https://eFroD.github.io/bca-survival-analyzer/'
+abstract: >-
+  bca-survival is an open-source Python package that
+  streamlines the analysis pipeline from CT-derived body
+  composition measurements to survival analysis results. The
+  package provides a unified interface for merging clinical
+  data with body composition measurements, performing Cox
+  proportional hazards regression, generating Kaplan-Meier
+  survival curves, and exporting results in multiple
+  formats.
+keywords:
+  - survival analysis
+  - body composition
+  - CT imaging
+  - oncology
+  - medical imaging
+  - Python
+license: MIT
