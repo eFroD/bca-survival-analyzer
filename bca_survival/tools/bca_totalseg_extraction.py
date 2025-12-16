@@ -185,20 +185,6 @@ def main_cli() -> None:
     main(args.base_path, args.output_path)
 
 
-# def get_version() -> str:
-#    """
-#    Get the version of the package.#
-
-#    Returns:
-#        str: The version string or 'development' if not available
-#    """
-#    try:
-#        from bca_survival._version import version
-#        return version
-#    except ImportError:
-#        return "development"
-
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Process BOA JSON files and export measurements to Excel files."
